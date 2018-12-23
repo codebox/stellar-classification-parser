@@ -106,8 +106,28 @@ function populateClassDetails(tree, result) {
     classDetails.text = collectText(searchForOne(tree, 'CLASSIFICATION_BODY'));
 
     if (isClassRange()) {
-        //TODO
+        const classCount = classes.length;
+        assert(classCount === 1 || classCount === 2);
 
+        if (classCount === 1) {
+            // Class is of the form A3-4
+            const numberAtEndOfRange = collectText(search(tree, 'CLASS_RANGE')[2]),
+                fromClass = classes[0],
+                toClass = deepCopy(fromClass);
+            toClass.number = numberAtEndOfRange;
+
+            classDetails.range = {
+                from : fromClass,
+                to : toClass
+            };
+
+        } else if (classCount === 2) {
+            // Class is of the form A3-A4
+            classDetails.range = {
+                from : classes[0],
+                to : classes[1]
+            };
+        }
     } else if (isClassChoice()) {
         //TODO
 
