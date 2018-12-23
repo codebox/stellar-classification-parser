@@ -1,0 +1,152 @@
+"use strict";
+
+const fs = require('fs'),
+    grammarText = fs.readFileSync('./grammar.txt').toString(),
+    START_SYMBOL = 'START',
+    EPSILON = 'ε',
+    UNABLE_TO_PARSE = 'nope',
+    cache = {},
+    parser = require('top-down-parser').buildParser(grammarText, START_SYMBOL, EPSILON);
+
+function assert(stmt) {
+    if (!stmt) {
+        throw new Error('Assertion failed')
+    }
+}
+
+function search(o, name) {
+    let results = [];
+    Object.keys(o).forEach(k => {
+        if (k === name) {
+            results.push(o[k]);
+        }
+        let values = o[k];
+        if (!Array.isArray(values)){
+            values = [values];
+        }
+        values.forEach(v => {
+            if (typeof v === 'object') {
+                results.push(...search(v, name));
+            }
+        })
+    });
+    return results;
+}
+
+function searchForOne(o, name, def) {
+    const results = search(o, name);
+    let result;
+
+    if (results.length === 0) {
+        if (def !== undefined) {
+            result = def;
+        } else {
+            throw Error('no value found');
+        }
+
+    } else if (results.length === 1) {
+        const match = results[0];
+        if (Array.isArray(match)) {
+            if (match.length === 1){
+                result = match[0];
+            } else {
+                throw Error(`expected array with 1 value but found ${match}`)
+            }
+        } else {
+            result = match;
+        }
+
+    } else {
+        throw Error('multiple values found');
+    }
+
+    if (result === EPSILON) {
+        return def;
+    } else {
+        return result;
+    }
+}
+
+function collectText(node) {
+    let text = '';
+    if (typeof node === 'object') {
+        if (Array.isArray(node)) {
+            return node.map(collectText).join('');
+        } else {
+            return Object.values(node).map(collectText).join('');
+        }
+    } else if (node !== EPSILON) {
+        text += node;
+    }
+    return text;
+}
+
+function populateClassDetails(tree, result) {
+    function isClassRange() {
+        return search(tree, 'CLASS_RANGE').length > 0;
+    }
+    function isClassChoice() {
+        return search(tree, 'CLASS_CHOICE').length > 0;
+    }
+    function getClasses() {
+        return search(tree, 'CLASS').map(classNode => {
+            const result = {
+                letter : searchForOne(classNode, 'CLASS_LETTER')
+            }, numbersNode = searchForOne(classNode, 'CLASS_NUMBERS', '');
+            if (numbersNode) {
+                result.number = collectText(numbersNode);
+            }
+            return result;
+        });
+    }
+
+    const classDetails = result.class = {},
+        classes = getClasses();
+
+    classDetails.text = collectText(searchForOne(tree, 'CLASSIFICATION_BODY'));
+
+    if (isClassRange()) {
+        //TODO
+
+    } else if (isClassChoice()) {
+        //TODO
+
+    } else {
+        assert(classes.length === 1);
+        classDetails.value = classes[0];
+    }
+}
+
+function populateLuminosityDetails(tree, result) {
+    //TODO
+}
+
+function transformParseTree(tree) {
+    const result = {};
+
+    populateClassDetails(tree, result);
+    populateLuminosityDetails(tree, result);
+
+    return result;
+}
+
+function parse(text) {
+    let result = cache[text];
+
+    if (!result) {
+        const parseResult = parser.parse(text);
+
+        if (parseResult && !parseResult.remainder) {
+            cache[text] = transformParseTree(parseResult.tree);
+        } else {
+            cache[text] = UNABLE_TO_PARSE;
+        }
+    }
+
+    if (result !== UNABLE_TO_PARSE) {
+        console.log(JSON.stringify(result))
+        return result;
+    }
+}
+
+exports.parse = parse;
