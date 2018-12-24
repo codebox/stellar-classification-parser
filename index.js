@@ -126,16 +126,14 @@ function populateClassDetails(tree, result) {
     }
     function getClasses() {
         return search(tree, 'CLASS').map(classNode => {
-            const result = {
-                letter : searchForOne(classNode, 'CLASS_LETTER')
-            }, numbersNode = search(classNode, 'CLASS_NUMBERS');
-
-            if (numbersNode && numbersNode.length) {
-                const numberText = collectText(numbersNode);
-                if (numberText){
-                    result.number = Number(numberText);
+            const result = {};
+            classNode.forEach(classPath => {
+                if (classPath.hasOwnProperty('CLASS_LETTER')){
+                    result.letter = classPath['CLASS_LETTER'];
+                } else if (classPath.hasOwnProperty('CLASS_NUMBER')){
+                    result.number = classPath['CLASS_NUMBER'];
                 }
-            }
+            });
             return result;
         });
     }
@@ -146,12 +144,15 @@ function populateClassDetails(tree, result) {
     classDetails.text = collectText(searchForOne(tree, 'CLASSIFICATION_BODY'));
 
     if (isClassRange()) {
+        const classRangeChildNodes = search(tree, 'CLASS_RANGE')[0];
+        assert(classRangeChildNodes.length === 3);
+
         const classCount = classes.length;
         assert(classCount === 1 || classCount === 2);
 
         if (classCount === 1) {
             // Class is of the form A3-4
-            const numberAtEndOfRange = Number(collectText(search(tree, 'CLASS_RANGE')[0][2])),
+            const numberAtEndOfRange = classRangeChildNodes[2]['CLASS_NUMBER'],
                 fromClass = classes[0],
                 toClass = deepCopy(fromClass);
             toClass.number = numberAtEndOfRange;
@@ -169,12 +170,15 @@ function populateClassDetails(tree, result) {
             };
         }
     } else if (isClassChoice()) {
+        const classChoiceChildNodes = search(tree, 'CLASS_CHOICE')[0];
+        assert(classChoiceChildNodes.length === 3);
+
         const classCount = classes.length;
         assert(classCount === 1 || classCount === 2);
 
         if (classCount === 1) {
             // Class is of the form A3/4
-            const numberAtEndOfRange = Number(collectText(search(tree, 'CLASS_CHOICE')[0][2])),
+            const numberAtEndOfRange = classChoiceChildNodes[2]['CLASS_NUMBER'],
                 class1 = classes[0],
                 class2 = deepCopy(class1);
             class2.number = numberAtEndOfRange;
@@ -223,6 +227,76 @@ function populateLuminosityDetails(tree, result) {
     //const luminosityDetails = result.luminosity = {};
 }
 
+function flattenParseTree(tree) {
+    function walk(node, handler = n => n) {
+        Object.keys(node).forEach(key => {
+            const value = node[key];
+            if (typeof value === 'object') {
+                walk(value, handler);
+            }
+        });
+        Object.keys(node).forEach(key => {
+            handler(node, key, node[key]);
+        });
+    }
+
+    function trimSingleElementArrays(obj, key, val) {
+        if (Array.isArray(val) && val.length === 1 && typeof val[0] === 'string') {
+            obj[key] = val[0];
+        }
+    }
+
+    function removeEpsilons(obj, key, val) {
+        if (val === EPSILON) {
+            delete obj[key];
+        }
+    }
+
+    function removeRangeAndChoiceDelimiters(obj, key, val) {
+        if (val === '/' || val === '-') {
+            delete obj[key];
+        }
+    }
+
+    function removeEmptyObjects(obj, key, val) {
+        if (Object.keys(val).length === 0 && val.constructor === Object) {
+            delete obj[key];
+        } else if (Array.isArray(val) && val.length === 0) {
+            delete obj[key];
+        }
+    }
+
+    function filterArrays(obj, key, val) {
+        function isEmptyObject(o) {
+            return Object.keys(o).length === 0 && o.constructor === Object
+        }
+        function isEmptyArray(o) {
+            return Array.isArray(o) && o.length === 0;
+        }
+        function isEmptyValue(o){
+            return o === undefined || o === null || o === '';
+        }
+        if (Array.isArray(val)) {
+            obj[key] = val.filter(o => !isEmptyObject(o) && !isEmptyArray(o) && !isEmptyValue(o));
+        }
+    }
+
+    function flattenClassNumbers(obj, key, val) {
+        if (key === 'CLASS_NUMBER') {
+            obj[key] = Number(collectText(obj[key]));
+        }
+    }
+
+    walk(tree, removeEpsilons);
+    //walk(tree, removeRangeAndChoiceDelimiters);
+    walk(tree, filterArrays);
+    walk(tree, removeEmptyObjects);
+    walk(tree, filterArrays);
+    walk(tree, trimSingleElementArrays);
+    walk(tree, filterArrays);
+    walk(tree, flattenClassNumbers);
+}
+
 function transformParseTree(tree) {
     const result = {};
 
@@ -239,8 +313,9 @@ function parse(text) {
         const parseResult = parser.parse(text);
         console.log(JSON.stringify(parseResult))
 
-
         if (parseResult && !parseResult.remainder) {
+            flattenParseTree(parseResult.tree)
+            console.log(JSON.stringify(parseResult))
             cache[text] = transformParseTree(parseResult.tree);
         } else {
             cache[text] = UNABLE_TO_PARSE;
