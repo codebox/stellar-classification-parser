@@ -6,7 +6,39 @@ const fs = require('fs'),
     EPSILON = 'ε',
     UNABLE_TO_PARSE = 'nope',
     cache = {},
-    parser = require('top-down-parser').buildParser(grammarText, START_SYMBOL, EPSILON);
+    parser = require('top-down-parser').buildParser(grammarText, START_SYMBOL, EPSILON),
+    LUMINOSITY_DESCRIPTIONS = {
+        '0' : 'Hypergiant',
+        'Ia+' : 'Hypergiant',
+        'Ia' : 'Luminous Supergiant',
+        'Iab' : 'Intermediate size Luminous Supergiant',
+        'Ib' : 'Less Luminous Supergiant',
+        'I' : 'Supergiant',
+        'II' : 'Bright Giant',
+        'IIa' : 'Luminous Bright Giant',
+        'IIb' : 'Less Luminous Bright Giant',
+        'III' : 'Giant',
+        'IIIa' : 'Luminous Giant',
+        'IIIb' : 'Less Luminous Giant',
+        'IV' : 'Sub-Giant',
+        'IVa' : 'Luminous Sub-Giant',
+        'IVb' : 'Less Luminous Sub-Giant',
+        'V' : 'Dwarf (Main Sequence)',
+        'Va' : 'Luminous Dwarf (Main Sequence)',
+        'Vb' : 'Less Luminous Dwarf (Main Sequence)',
+        'VI' : 'Sub-Dwarf',
+        'VIa' : 'Luminous Sub-Dwarf',
+        'VIb' : 'Less Luminous Sub-Dwarf',
+        'VII' : 'White-Dwarf',
+        'VIIa' : 'Luminous White-Dwarf',
+        'VIIb' : 'Less Luminous White-Dwarf'
+    },
+    LUMINOSITY_PREFIX_TRANSLATION = {
+        "sd" : "VI",
+        "d" : "V",
+        "sg" : "I",
+        "g" : "III"
+    };
 
 function assert(stmt) {
     if (!stmt) {
@@ -166,7 +198,29 @@ function populateClassDetails(tree, result) {
 }
 
 function populateLuminosityDetails(tree, result) {
-    //TODO
+    function hasLuminosityPrefix() {
+        return search(tree, 'LUMINOSITY_PREFIX').length > 0;
+    }
+    function hasLuminositySuffix() {
+        return search(tree, 'LUMINOSITIES').length > 0;
+    }
+    function isLuminosityRange() {
+        return search(tree, 'LUMINOSITY_RANGE').length > 0;
+    }
+    function isLuminosityChoice() {
+        return search(tree, 'LUMINOSITY_CHOICE').length > 0;
+    }
+    function getLuminosities() {
+        return search(tree, 'LUMINOSITY').map(luminosityNode => {
+            const result = {
+                description: LUMINOSITY_DESCRIPTIONS[luminosityValue]
+            };
+            return result;
+        });
+    }
+
+
+    //const luminosityDetails = result.luminosity = {};
 }
 
 function transformParseTree(tree) {
@@ -183,6 +237,8 @@ function parse(text) {
 
     if (!result) {
         const parseResult = parser.parse(text);
+        console.log(JSON.stringify(parseResult))
+
 
         if (parseResult && !parseResult.remainder) {
             cache[text] = transformParseTree(parseResult.tree);
@@ -190,7 +246,6 @@ function parse(text) {
             cache[text] = UNABLE_TO_PARSE;
         }
     }
-    console.log(JSON.stringify(result))
     if (result !== UNABLE_TO_PARSE) {
 
         return result;
