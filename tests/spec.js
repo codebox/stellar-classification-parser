@@ -13,7 +13,7 @@ describe("Classifier", function() {
     };
   }
 
-  it("handles single letters correctly", function() {
+  describe("handles single letters correctly", function() {
     function resultWithLetter(letter) {
       return {
         class : {
@@ -24,19 +24,19 @@ describe("Classifier", function() {
         }
       };
     }
-    theText("O").isParsedToExactly(resultWithLetter('O'));
-    theText("B").isParsedToExactly(resultWithLetter('B'));
-    theText("A").isParsedToExactly(resultWithLetter('A'));
-    theText("F").isParsedToExactly(resultWithLetter('F'));
-    theText("G").isParsedToExactly(resultWithLetter('G'));
-    theText("K").isParsedToExactly(resultWithLetter('K'));
-    theText("M").isParsedToExactly(resultWithLetter('M'));
+    it("O is valid", () => theText("O").isParsedToExactly(resultWithLetter('O')));
+    it("B is valid", () => theText("B").isParsedToExactly(resultWithLetter('B')));
+    it("A is valid", () => theText("A").isParsedToExactly(resultWithLetter('A')));
+    it("F is valid", () => theText("F").isParsedToExactly(resultWithLetter('F')));
+    it("G is valid", () => theText("G").isParsedToExactly(resultWithLetter('G')));
+    it("K is valid", () => theText("K").isParsedToExactly(resultWithLetter('K')));
+    it("M is valid", () => theText("M").isParsedToExactly(resultWithLetter('M')));
 
-    theText("X").cannotBeParsed();
-    theText("Q").cannotBeParsed();
+    it("X is invalid", () => theText("X").cannotBeParsed());
+    it("Q is invalid", () => theText("Q").cannotBeParsed());
   });
 
-  it("handles single letters and numbers correctly", function() {
+  describe("handles single letters and numbers correctly", function() {
     function resultWithLetterAndNumber(letter, number){
       return {
         class : {
@@ -48,32 +48,34 @@ describe("Classifier", function() {
         }
       };
     }
-    theText("A0").isParsedToExactly(resultWithLetterAndNumber('A', 0));
-    theText("F5").isParsedToExactly(resultWithLetterAndNumber('F', 5));
-    theText("K9").isParsedToExactly(resultWithLetterAndNumber('K', 9));
-    theText("G2.5").isParsedToExactly(resultWithLetterAndNumber('G', 2.5));
+    it("A0 is valid", () => theText("A0").isParsedToExactly(resultWithLetterAndNumber('A', 0)));
+    it("F5 is valid", () => theText("F5").isParsedToExactly(resultWithLetterAndNumber('F', 5)));
+    it("K9 is valid", () => theText("K9").isParsedToExactly(resultWithLetterAndNumber('K', 9)));
+    it("G2.5 is valid", () => theText("G2.5").isParsedToExactly(resultWithLetterAndNumber('G', 2.5)));
 
-    theText("Q0").cannotBeParsed();
-    theText("F33").cannotBeParsed();
-    theText("F2.5.7").cannotBeParsed();
-    theText("F2.55").cannotBeParsed();
+    it("Q0 is invalid", () => theText("Q0").cannotBeParsed());
+    it("F33 is invalid", () => theText("F33").cannotBeParsed());
+    it("F2.5.7 is invalid", () => theText("F2.5.7").cannotBeParsed());
+    it("F2.55 is invalid", () => theText("F2.55").cannotBeParsed());
   });
 
   describe("multiple", () => {
-    it("letters are handled correctly", () => {
+    it("letters are handled correctly in ranges", () => {
       theText("A-F").isParsedToExactly({
-        class : {
-          text : 'A-F',
-          range : {
-            from : {
-              letter : 'A'
+        class: {
+          text: 'A-F',
+          range: {
+            from: {
+              letter: 'A'
             },
-            to : {
-              letter : 'F'
+            to: {
+              letter: 'F'
             }
           }
         }
       });
+    });
+    it("letters are handled correctly in choices", () => {
       theText("A/F").isParsedToExactly({
         class : {
           text : 'A/F',
@@ -88,22 +90,24 @@ describe("Classifier", function() {
         }
       });
     });
-    it("letters with numbers are handled correctly", () => {
+    it("letters with numbers are handled correctly in ranges", () => {
       theText("A8-F2").isParsedToExactly({
-        class : {
-          text : 'A8-F2',
-          range : {
-            from : {
-              letter : 'A',
-              number : 8
+        class: {
+          text: 'A8-F2',
+          range: {
+            from: {
+              letter: 'A',
+              number: 8
             },
-            to : {
-              letter : 'F',
-              number : 2
+            to: {
+              letter: 'F',
+              number: 2
             }
           }
         }
       });
+    });
+    it("letters with numbers are handled correctly in choices", () => {
       theText("A8/F2").isParsedToExactly({
         class : {
           text : 'A8/F2',
@@ -120,22 +124,24 @@ describe("Classifier", function() {
         }
       });
     });
-    it("numbers are handled correctly", () => {
+    it("letters with number ranges are handled correctly", () => {
       theText("A5-9").isParsedToExactly({
-        class : {
-          text : 'A5-9',
-          range : {
-            from : {
-              letter : 'A',
-              number : 5
+        class: {
+          text: 'A5-9',
+          range: {
+            from: {
+              letter: 'A',
+              number: 5
             },
-            to : {
-              letter : 'A',
-              number : 9
+            to: {
+              letter: 'A',
+              number: 9
             }
           }
         }
       });
+    });
+    it("letters with number choices are handled correctly", () => {
       theText("A5/6").isParsedToExactly({
         class : {
           text : 'A5/6',
@@ -152,9 +158,9 @@ describe("Classifier", function() {
         }
       });
     });
-  })
+  });
 
-  it("handles single luminosities correctly", function() {
+  describe("handles single luminosities correctly", function() {
     function resultWithLuminosity(luminosity, description){
       return {
         class : {
@@ -173,159 +179,159 @@ describe("Classifier", function() {
         }
       };
     }
-    theText("G50").isParsedToExactly(resultWithLuminosity('0', 'Hypergiant'));
-    theText("G5I").isParsedToExactly(resultWithLuminosity('I', 'Supergiant'));
-    theText("G5Ia+").isParsedToExactly(resultWithLuminosity('Ia+', 'Hypergiant'));
-    theText("G5Ia").isParsedToExactly(resultWithLuminosity('Ia', 'Luminous Supergiant'));
-    theText("G5Iab").isParsedToExactly(resultWithLuminosity('Iab', 'Intermediate size Luminous Supergiant'));
-    theText("G5Ib").isParsedToExactly(resultWithLuminosity('Ib', 'Less Luminous Supergiant'));
-    theText("G5II").isParsedToExactly(resultWithLuminosity('II', 'Bright Giant'));
-    theText("G5IIa").isParsedToExactly(resultWithLuminosity('IIa', 'Luminous Bright Giant'));
-    theText("G5IIb").isParsedToExactly(resultWithLuminosity('IIb', 'Less Luminous Bright Giant'));
-    theText("G5III").isParsedToExactly(resultWithLuminosity('III', 'Giant'));
-    theText("G5IIIa").isParsedToExactly(resultWithLuminosity('IIIa', 'Luminous Giant'));
-    theText("G5IIIb").isParsedToExactly(resultWithLuminosity('IIIb', 'Less Luminous Giant'));
-    theText("G5IV").isParsedToExactly(resultWithLuminosity('IV', 'Sub-Giant'));
-    theText("G5IVa").isParsedToExactly(resultWithLuminosity('IVa', 'Luminous Sub-Giant'));
-    theText("G5IVb").isParsedToExactly(resultWithLuminosity('IVb', 'Less Luminous Sub-Giant'));
-    theText("G5V").isParsedToExactly(resultWithLuminosity('V', 'Dwarf (Main Sequence)'));
-    theText("G5Va").isParsedToExactly(resultWithLuminosity('Va', 'Luminous Dwarf (Main Sequence)'));
-    theText("G5Vb").isParsedToExactly(resultWithLuminosity('Vb', 'Less Luminous Dwarf (Main Sequence)'));
-    theText("G5VI").isParsedToExactly(resultWithLuminosity('VI', 'Sub-Dwarf'));
-    theText("G5VIa").isParsedToExactly(resultWithLuminosity('VIa', 'Luminous Sub-Dwarf'));
-    theText("G5VIb").isParsedToExactly(resultWithLuminosity('VIb', 'Less Luminous Sub-Dwarf'));
-    theText("G5VII").isParsedToExactly(resultWithLuminosity('VII', 'White-Dwarf'));
-    theText("G5VIIa").isParsedToExactly(resultWithLuminosity('VIIa', 'Luminous White-Dwarf'));
-    theText("G5VIIb").isParsedToExactly(resultWithLuminosity('VIIb', 'Less Luminous White-Dwarf'));
+    it("G50 is valid", () => theText("G50").isParsedToExactly(resultWithLuminosity('0', 'Hypergiant')));
+    it("G5I is valid", () => theText("G5I").isParsedToExactly(resultWithLuminosity('I', 'Supergiant')));
+    it("G5Ia+ is valid", () => theText("G5Ia+").isParsedToExactly(resultWithLuminosity('Ia+', 'Hypergiant')));
+    it("G5Ia is valid", () => theText("G5Ia").isParsedToExactly(resultWithLuminosity('Ia', 'Luminous Supergiant')));
+    it("G5Iab is valid", () => theText("G5Iab").isParsedToExactly(resultWithLuminosity('Iab', 'Intermediate size Luminous Supergiant')));
+    it("G5Ib is valid", () => theText("G5Ib").isParsedToExactly(resultWithLuminosity('Ib', 'Less Luminous Supergiant')));
+    it("G5II is valid", () => theText("G5II").isParsedToExactly(resultWithLuminosity('II', 'Bright Giant')));
+    it("G5IIa is valid", () => theText("G5IIa").isParsedToExactly(resultWithLuminosity('IIa', 'Luminous Bright Giant')));
+    it("G5IIb is valid", () => theText("G5IIb").isParsedToExactly(resultWithLuminosity('IIb', 'Less Luminous Bright Giant')));
+    it("G5III is valid", () => theText("G5III").isParsedToExactly(resultWithLuminosity('III', 'Giant')));
+    it("G5IIIa is valid", () => theText("G5IIIa").isParsedToExactly(resultWithLuminosity('IIIa', 'Luminous Giant')));
+    it("G5IIIb is valid", () => theText("G5IIIb").isParsedToExactly(resultWithLuminosity('IIIb', 'Less Luminous Giant')));
+    it("G5IV is valid", () => theText("G5IV").isParsedToExactly(resultWithLuminosity('IV', 'Sub-Giant')));
+    it("G5IVa is valid", () => theText("G5IVa").isParsedToExactly(resultWithLuminosity('IVa', 'Luminous Sub-Giant')));
+    it("G5IVb is valid", () => theText("G5IVb").isParsedToExactly(resultWithLuminosity('IVb', 'Less Luminous Sub-Giant')));
+    it("G5V is valid", () => theText("G5V").isParsedToExactly(resultWithLuminosity('V', 'Dwarf (Main Sequence)')));
+    it("G5Va is valid", () => theText("G5Va").isParsedToExactly(resultWithLuminosity('Va', 'Luminous Dwarf (Main Sequence)')));
+    it("G5Vb is valid", () => theText("G5Vb").isParsedToExactly(resultWithLuminosity('Vb', 'Less Luminous Dwarf (Main Sequence)')));
+    it("G5VI is valid", () => theText("G5VI").isParsedToExactly(resultWithLuminosity('VI', 'Sub-Dwarf')));
+    it("G5VIa is valid", () => theText("G5VIa").isParsedToExactly(resultWithLuminosity('VIa', 'Luminous Sub-Dwarf')));
+    it("G5VIb is valid", () => theText("G5VIb").isParsedToExactly(resultWithLuminosity('VIb', 'Less Luminous Sub-Dwarf')));
+    it("G5VII is valid", () => theText("G5VII").isParsedToExactly(resultWithLuminosity('VII', 'White-Dwarf')));
+    it("G5VIIa is valid", () => theText("G5VIIa").isParsedToExactly(resultWithLuminosity('VIIa', 'Luminous White-Dwarf')));
+    it("G5VIIb is valid", () => theText("G5VIIb").isParsedToExactly(resultWithLuminosity('VIIb', 'Less Luminous White-Dwarf')));
 
-    theText("G5VIII").cannotBeParsed();
-    theText("G5X").cannotBeParsed();
+    it("G5VIII is invalid", () => theText("G5VIII").cannotBeParsed());
+    it("G5X is invalid", () => theText("G5X").cannotBeParsed());
 
-    theText("sdG5").isParsedToExactly(resultWithLuminosity('sd', 'Sub-Dwarf'));
-    theText("dG5").isParsedToExactly(resultWithLuminosity('d', 'Dwarf (Main Sequence)'));
-    theText("sgG5").isParsedToExactly(resultWithLuminosity('sg', 'Supergiant'));
-    theText("gG5").isParsedToExactly(resultWithLuminosity('g', 'Giant'));
+    it("sdG5 is invalid", () => theText("sdG5").isParsedToExactly(resultWithLuminosity('sd', 'Sub-Dwarf')));
+    it("dG5 is invalid", () => theText("dG5").isParsedToExactly(resultWithLuminosity('d', 'Dwarf (Main Sequence)')));
+    it("sgG5 is invalid", () => theText("sgG5").isParsedToExactly(resultWithLuminosity('sg', 'Supergiant')));
+    it("gG5 is invalid", () => theText("gG5").isParsedToExactly(resultWithLuminosity('g', 'Giant')));
 
-    theText("gG5V").cannotBeParsed();    
-    theText("sg/gG5").cannotBeParsed();    
-    theText("sg-gG5").cannotBeParsed();    
-    theText("sdG5III/IV").cannotBeParsed();    
-    theText("sdG5III-IV").cannotBeParsed();    
+    it("gG5V is invalid", () => theText("gG5V").cannotBeParsed());
+    it("sg/gG5 is invalid", () => theText("sg/gG5").cannotBeParsed());
+    it("sg-gG5 is invalid", () => theText("sg-gG5").cannotBeParsed());
+    it("sdG5III/IV is invalid", () => theText("sdG5III/IV").cannotBeParsed());
+    it("sdG5III-IV is invalid", () => theText("sdG5III-IV").cannotBeParsed());
   });
 
-  it("handles multiple luminosities correctly", function() {
-    theText("G5II-III").isParsedToExactly({
-        class : {
-          text : 'G5',
-          value : {
+  describe("handles multiple luminosities correctly", function() {
+    it("with ranges", () => theText("G5II-III").isParsedToExactly({
+      class : {
+        text : 'G5',
+        value : {
+          letter : 'G',
+          number : 5
+        }
+      },
+      luminosity : {
+        text : 'II-III',
+        range : {
+          from : {
+              luminosityClass : 'II',
+              description : 'Bright Giant'
+          },
+          to : {
+              luminosityClass : 'III',
+              description : 'Giant'
+          }
+        }
+      }
+    }));
+    it("with choices", () => theText("G5II/III/IV").isParsedToExactly({
+      class : {
+        text : 'G5',
+        value : {
+          letter : 'G',
+          number : 5
+        }
+      },
+      luminosity : {
+        text : 'II/III/IV',
+        choice : [
+          {
+              luminosityClass : 'II',
+              description : 'Bright Giant'
+          },
+          {
+              luminosityClass : 'III',
+              description : 'Giant'
+          },
+          {
+              luminosityClass : 'IV',
+              description : 'Sub-Giant'
+          }
+        ]
+      }
+    }));
+    it("with range of classes and choice of luminosities", () => theText("G5-K2II/III/IV").isParsedToExactly({
+      class : {
+        text : 'G5-K2',
+        range : {
+          from : {
             letter : 'G',
             number : 5
-          }
-        },
-        luminosity : {
-          text : 'II-III',
-          range : {
-            from : {
-                luminosityClass : 'II',
-                description : 'Bright Giant'
-            },
-            to : {
-                luminosityClass : 'III',
-                description : 'Giant'
-            }
+          },
+          to : {
+            letter : 'K',
+            number : 2
           }
         }
-      });
-    theText("G5II/III/IV").isParsedToExactly({
-        class : {
-          text : 'G5',
-          value : {
+      },
+      luminosity : {
+        text : 'II/III/IV',
+        choice : [
+          {
+              luminosityClass : 'II',
+              description : 'Bright Giant'
+          },
+          {
+              luminosityClass : 'III',
+              description : 'Giant'
+          },
+          {
+              luminosityClass : 'IV',
+              description : 'Sub-Giant'
+          }
+        ]
+      }
+    }));
+    it("with choice of classes and choice of luminosities", () => theText("G5/K2II/III/IV").isParsedToExactly({
+      class : {
+        text : 'G5/K2',
+        choice : [
+          {
             letter : 'G',
             number : 5
+          },
+          {
+            letter : 'K',
+            number : 2
           }
-        },
-        luminosity : {
-          text : 'II/III/IV',
-          choice : [
-            {
-                luminosityClass : 'II',
-                description : 'Bright Giant'
-            },
-            {
-                luminosityClass : 'III',
-                description : 'Giant'
-            },
-            {
-                luminosityClass : 'IV',
-                description : 'Sub-Giant'
-            }
-          ]
-        }
-      });
-    theText("G5-K2II/III/IV").isParsedToExactly({
-        class : {
-          text : 'G5-K2',
-          range : {
-            from : {
-              letter : 'G',
-              number : 5
-            },
-            to : {
-              letter : 'K',
-              number : 2
-            }
+        ]
+      },
+      luminosity : {
+        text : 'II/III/IV',
+        choice : [
+          {
+              luminosityClass : 'II',
+              description : 'Bright Giant'
+          },
+          {
+              luminosityClass : 'III',
+              description : 'Giant'
+          },
+          {
+              luminosityClass : 'IV',
+              description : 'Sub-Giant'
           }
-        },
-        luminosity : {
-          text : 'II/III/IV',
-          choice : [
-            {
-                luminosityClass : 'II',
-                description : 'Bright Giant'
-            },
-            {
-                luminosityClass : 'III',
-                description : 'Giant'
-            },
-            {
-                luminosityClass : 'IV',
-                description : 'Sub-Giant'
-            }
-          ]
-        }
-      });
-    theText("G5/K2II/III/IV").isParsedToExactly({
-        class : {
-          text : 'G5/K2',
-          choice : [
-            {
-              letter : 'G',
-              number : 5
-            },
-            {
-              letter : 'K',
-              number : 2
-            }
-          ]
-        },
-        luminosity : {
-          text : 'II/III/IV',
-          choice : [
-            {
-                luminosityClass : 'II',
-                description : 'Bright Giant'
-            },
-            {
-                luminosityClass : 'III',
-                description : 'Giant'
-            },
-            {
-                luminosityClass : 'IV',
-                description : 'Sub-Giant'
-            }
-          ]
-        }
-      });
+        ]
+      }
+    }));
   });
 
 });

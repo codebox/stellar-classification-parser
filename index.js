@@ -14,6 +14,10 @@ function assert(stmt) {
     }
 }
 
+function deepCopy(o) {
+    return JSON.parse(JSON.stringify(o));
+}
+
 function search(o, name) {
     let results = [];
     Object.keys(o).forEach(k => {
@@ -30,7 +34,7 @@ function search(o, name) {
             }
         })
     });
-    return results;
+    return results.filter(k => k !== EPSILON);
 }
 
 function searchForOne(o, name, def) {
@@ -92,9 +96,13 @@ function populateClassDetails(tree, result) {
         return search(tree, 'CLASS').map(classNode => {
             const result = {
                 letter : searchForOne(classNode, 'CLASS_LETTER')
-            }, numbersNode = searchForOne(classNode, 'CLASS_NUMBERS', '');
-            if (numbersNode) {
-                result.number = collectText(numbersNode);
+            }, numbersNode = search(classNode, 'CLASS_NUMBERS');
+
+            if (numbersNode && numbersNode.length) {
+                const numberText = collectText(numbersNode);
+                if (numberText){
+                    result.number = Number(numberText);
+                }
             }
             return result;
         });
@@ -111,7 +119,7 @@ function populateClassDetails(tree, result) {
 
         if (classCount === 1) {
             // Class is of the form A3-4
-            const numberAtEndOfRange = collectText(search(tree, 'CLASS_RANGE')[2]),
+            const numberAtEndOfRange = Number(collectText(search(tree, 'CLASS_RANGE')[0][2])),
                 fromClass = classes[0],
                 toClass = deepCopy(fromClass);
             toClass.number = numberAtEndOfRange;
@@ -129,7 +137,27 @@ function populateClassDetails(tree, result) {
             };
         }
     } else if (isClassChoice()) {
-        //TODO
+        const classCount = classes.length;
+        assert(classCount === 1 || classCount === 2);
+
+        if (classCount === 1) {
+            // Class is of the form A3/4
+            const numberAtEndOfRange = Number(collectText(search(tree, 'CLASS_CHOICE')[0][2])),
+                class1 = classes[0],
+                class2 = deepCopy(class1);
+            class2.number = numberAtEndOfRange;
+            classDetails.choice = [
+                class1,
+                class2
+            ];
+
+        } else if (classCount === 2) {
+            // Class is of the form A3/A4
+            classDetails.choice = [
+                classes[0],
+                classes[1]
+            ];
+        }
 
     } else {
         assert(classes.length === 1);
@@ -162,9 +190,9 @@ function parse(text) {
             cache[text] = UNABLE_TO_PARSE;
         }
     }
-
+    console.log(JSON.stringify(result))
     if (result !== UNABLE_TO_PARSE) {
-        console.log(JSON.stringify(result))
+
         return result;
     }
 }
