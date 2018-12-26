@@ -4,7 +4,6 @@ describe("Classifier", function() {
   function theText(txt) {
     return {
       isParsedToExactly(expectedResult) {
-        console.log(txt,'=>',parse(txt))
         expect(parse(txt)).toEqual(expectedResult);
       },
       cannotBeParsed() {
