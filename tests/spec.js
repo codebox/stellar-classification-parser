@@ -161,7 +161,7 @@ describe("Classifier", function() {
   });
 
   describe("handles single luminosities correctly", function() {
-    function resultWithLuminosity(luminosity, description){
+    function resultWithLuminosity(luminosity, description, text = luminosity){
       return {
         class : {
           text : `G5`,
@@ -171,7 +171,7 @@ describe("Classifier", function() {
           }
         },
         luminosity : {
-          text : luminosity,
+          text,
           value : {
               luminosityClass : luminosity,
               description
@@ -207,10 +207,10 @@ describe("Classifier", function() {
     it("G5VIII is invalid", () => theText("G5VIII").cannotBeParsed());
     it("G5X is invalid", () => theText("G5X").cannotBeParsed());
 
-    it("sdG5 is invalid", () => theText("sdG5").isParsedToExactly(resultWithLuminosity('sd', 'Sub-Dwarf')));
-    it("dG5 is invalid", () => theText("dG5").isParsedToExactly(resultWithLuminosity('d', 'Dwarf (Main Sequence)')));
-    it("sgG5 is invalid", () => theText("sgG5").isParsedToExactly(resultWithLuminosity('sg', 'Supergiant')));
-    it("gG5 is invalid", () => theText("gG5").isParsedToExactly(resultWithLuminosity('g', 'Giant')));
+    it("sdG5 is valid", () => theText("sdG5").isParsedToExactly(resultWithLuminosity('VI', 'Sub-Dwarf', 'sd')));
+    it("dG5 is valid", () => theText("dG5").isParsedToExactly(resultWithLuminosity('V', 'Dwarf (Main Sequence)', 'd')));
+    it("sgG5 is valid", () => theText("sgG5").isParsedToExactly(resultWithLuminosity('I', 'Supergiant', 'sg')));
+    it("gG5 is valid", () => theText("gG5").isParsedToExactly(resultWithLuminosity('III', 'Giant', 'g')));
 
     it("gG5V is invalid", () => theText("gG5V").cannotBeParsed());
     it("sg/gG5 is invalid", () => theText("sg/gG5").cannotBeParsed());
@@ -242,7 +242,7 @@ describe("Classifier", function() {
         }
       }
     }));
-    it("with choices", () => theText("G5II/III/IV").isParsedToExactly({
+    it("with choices", () => theText("G5II/III").isParsedToExactly({
       class : {
         text : 'G5',
         value : {
@@ -251,7 +251,7 @@ describe("Classifier", function() {
         }
       },
       luminosity : {
-        text : 'II/III/IV',
+        text : 'II/III',
         choice : [
           {
               luminosityClass : 'II',
@@ -260,15 +260,11 @@ describe("Classifier", function() {
           {
               luminosityClass : 'III',
               description : 'Giant'
-          },
-          {
-              luminosityClass : 'IV',
-              description : 'Sub-Giant'
           }
         ]
       }
     }));
-    it("with range of classes and choice of luminosities", () => theText("G5-K2II/III/IV").isParsedToExactly({
+    it("with range of classes and choice of luminosities", () => theText("G5-K2II/III").isParsedToExactly({
       class : {
         text : 'G5-K2',
         range : {
@@ -283,7 +279,7 @@ describe("Classifier", function() {
         }
       },
       luminosity : {
-        text : 'II/III/IV',
+        text : 'II/III',
         choice : [
           {
               luminosityClass : 'II',
@@ -292,15 +288,11 @@ describe("Classifier", function() {
           {
               luminosityClass : 'III',
               description : 'Giant'
-          },
-          {
-              luminosityClass : 'IV',
-              description : 'Sub-Giant'
           }
         ]
       }
     }));
-    it("with choice of classes and choice of luminosities", () => theText("G5/K2II/III/IV").isParsedToExactly({
+    it("with choice of classes and choice of luminosities", () => theText("G5/K2II/III").isParsedToExactly({
       class : {
         text : 'G5/K2',
         choice : [
@@ -315,7 +307,7 @@ describe("Classifier", function() {
         ]
       },
       luminosity : {
-        text : 'II/III/IV',
+        text : 'II/III',
         choice : [
           {
               luminosityClass : 'II',
@@ -324,10 +316,6 @@ describe("Classifier", function() {
           {
               luminosityClass : 'III',
               description : 'Giant'
-          },
-          {
-              luminosityClass : 'IV',
-              description : 'Sub-Giant'
           }
         ]
       }

@@ -141,7 +141,7 @@ function populateClassDetails(tree, result) {
     const classDetails = result.class = {},
         classes = getClasses();
 
-    classDetails.text = collectText(searchForOne(tree, 'CLASSIFICATION_BODY'));
+    classDetails.text = collectText(searchForOne(tree, 'CLASSES'));
 
     if (isClassRange()) {
         const classRangeChildNodes = search(tree, 'CLASS_RANGE')[0];
@@ -214,17 +214,49 @@ function populateLuminosityDetails(tree, result) {
     function isLuminosityChoice() {
         return search(tree, 'LUMINOSITY_CHOICE').length > 0;
     }
-    function getLuminosities() {
-        return search(tree, 'LUMINOSITY').map(luminosityNode => {
-            const result = {
-                description: LUMINOSITY_DESCRIPTIONS[luminosityValue]
-            };
-            return result;
-        });
+    function getLuminosityValues() {
+        return search(tree, 'LUMINOSITY').map(collectText);
+    }
+    function buildLuminosity(value) {
+        return {
+            luminosityClass : value,
+            description : LUMINOSITY_DESCRIPTIONS[value]
+        }
     }
 
+    if (hasLuminosityPrefix()) {
+        const luminosityDetails = result.luminosity = {},
+            prefix = searchForOne(tree, 'LUMINOSITY_PREFIX'),
+            value = LUMINOSITY_PREFIX_TRANSLATION[prefix];
 
-    //const luminosityDetails = result.luminosity = {};
+        luminosityDetails.text = prefix;
+        luminosityDetails.value = buildLuminosity(value);
+
+    } else if (hasLuminositySuffix()) {
+        const luminosityDetails = result.luminosity = {},
+            luminosities = getLuminosityValues();
+
+        luminosityDetails.text = collectText(searchForOne(tree, 'LUMINOSITIES'));
+
+        if (isLuminosityRange()) {
+            assert(luminosities.length === 2);
+
+            luminosityDetails.range = {
+                from : buildLuminosity(luminosities[0]),
+                to : buildLuminosity(luminosities[1])
+            };
+
+        } else if (isLuminosityChoice()) {
+            assert(luminosities.length === 2);
+
+            luminosityDetails.choice = luminosities.map(buildLuminosity);
+
+        } else {
+            assert(luminosities.length === 1);
+            luminosityDetails.value = buildLuminosity(luminosities[0]);
+        }
+    }
+
 }
 
 function flattenParseTree(tree) {
@@ -311,18 +343,17 @@ function parse(text) {
 
     if (!result) {
         const parseResult = parser.parse(text);
-        console.log(JSON.stringify(parseResult))
+        //console.log(JSON.stringify(parseResult))
 
         if (parseResult && !parseResult.remainder) {
             flattenParseTree(parseResult.tree)
-            console.log(JSON.stringify(parseResult))
+            //console.log(JSON.stringify(parseResult))
             cache[text] = transformParseTree(parseResult.tree);
         } else {
             cache[text] = UNABLE_TO_PARSE;
         }
     }
     if (result !== UNABLE_TO_PARSE) {
-
         return result;
     }
 }
