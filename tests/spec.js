@@ -728,6 +728,61 @@ describe("Classifier", function() {
           }]
         }
       }));
+      describe("traces of element", () => {
+        function resultForElement(abbrev, flag, name) {
+          return {
+            class : {
+              text: 'G',
+              value: {
+                letter: 'G'
+              }
+            },
+            peculiarities : {
+              text : abbrev,
+              flags : {
+                elements : {
+                  [flag]: true
+                }
+              },
+              details : [{
+                text : abbrev,
+                description : 'Abnormally strong spectral lines of ' + name
+              }]
+            }
+          };
+        }
+
+        it("Strontium", () => theText("GSr").isParsedToExactly(resultForElement('Sr', 'strontium', 'Strontium')));
+        it("Helium", () => theText("GHe").isParsedToExactly(resultForElement('He', 'helium', 'Helium')));
+        it("Europium", () => theText("GEu").isParsedToExactly(resultForElement('Eu', 'europium', 'Europium')));
+        it("Silicon", () => theText("GSi").isParsedToExactly(resultForElement('Si', 'silicon', 'Silicon')));
+        it("Mercury", () => theText("GHg").isParsedToExactly(resultForElement('Hg', 'mercury', 'Mercury')));
+        it("Manganese", () => theText("GMn").isParsedToExactly(resultForElement('Mn', 'manganese', 'Manganese')));
+        it("Chromium", () => theText("GCr").isParsedToExactly(resultForElement('Cr', 'chromium', 'Chromium')));
+        it("Iron", () => theText("GFe").isParsedToExactly(resultForElement('Fe', 'iron', 'Iron')));
+        it("Potassium", () => theText("GK").isParsedToExactly(resultForElement('K', 'potassium', 'Potassium')));
+
+        it("Element in brackets", () => theText("G(Fe)").isParsedToExactly({
+          class : {
+            text: 'G',
+            value: {
+              letter: 'G'
+            }
+          },
+          peculiarities : {
+            text : 'Fe',
+            flags : {
+              elements : {
+                iron: true
+              }
+            },
+            details : [{
+              text : 'Fe',
+              description : 'Abnormally strong spectral lines of Iron'
+            }]
+          }
+        }));
+      });
     });
   });
 });

@@ -121,6 +121,44 @@ const fs = require('fs'),
             'wl' : 'w',
             'wk' : 'w'
         })
+    },
+    ELEMENTS = {
+        'Sr' : {
+            flagName : 'strontium',
+            description : 'Strontium'
+        },
+        'He' : {
+            flagName : 'helium',
+            description : 'Helium'
+        },
+        'Eu' : {
+            flagName : 'europium',
+            description : 'Europium'
+        },
+        'Si' : {
+            flagName : 'silicon',
+            description : 'Silicon'
+        },
+        'Hg' : {
+            flagName : 'mercury',
+            description : 'Mercury'
+        },
+        'Mn' : {
+            flagName : 'manganese',
+            description : 'Manganese'
+        },
+        'Cr' : {
+            flagName : 'chromium',
+            description : 'Chromium'
+        },
+        'Fe' : {
+            flagName : 'iron',
+            description : 'Iron'
+        },
+        'K'  : {
+            flagName : 'potassium',
+            description : 'Potassium'
+        }
     };
 
 function populateDuplicates(obj) {
@@ -395,7 +433,15 @@ function populateLuminosityDetails(tree, result) {
 
 function populatePeculiarities(tree, result) {
     function getSuffixes() {
-        return search(tree, 'SUFFIX').map(suffix => Array.isArray(suffix) ? suffix.join(' ') : suffix);
+        return search(tree, 'SUFFIX')
+            .map(suffix => Array.isArray(suffix) ? suffix : [suffix])
+            .map(suffixArray => suffixArray.filter(el => typeof el ==='string'))
+            .filter(suffixArray => suffixArray.length)
+            .map(suffixArray => suffixArray.join(' '))
+    }
+
+    function getElements() {
+        return search(tree, 'ELEMENT').filter(el => typeof el === 'string');
     }
 
     const suffixes = getSuffixes();
@@ -415,6 +461,32 @@ function populatePeculiarities(tree, result) {
                 text : suffix,
                 description : details.description
             });
+        });
+    }
+
+    const elements = getElements();
+    if (elements.length) {
+        if (!result.peculiarities) {
+            result.peculiarities = {
+                text : '',
+                flags : {},
+                details : []
+            };
+        } else {
+            result.peculiarities.text += ' ';
+        }
+
+        result.peculiarities.text += elements.join(' ');
+        const flags = result.peculiarities.flags.elements = {};
+
+        elements.forEach(element => {
+            const details = ELEMENTS[element];
+
+            flags[details.flagName] = true;
+            result.peculiarities.details.push({
+                text : element,
+                description : `Abnormally strong spectral lines of ${details.description}`
+            })
         });
     }
 }
