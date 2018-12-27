@@ -440,6 +440,24 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("Emission lines with P Cygni profile", () => theText("Geq").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'eq',
+          flags : {
+            emissionLinesPCygni : true
+          },
+          details : [{
+            text : 'eq',
+            description : 'Emission lines with P Cygni profile'
+          }]
+        }
+      }));
     });
   });
 });

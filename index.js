@@ -64,6 +64,10 @@ const fs = require('fs'),
             'e' : {
                 flagName : 'emissionLines',
                 description : 'Emission lines'
+            },
+            'eq' : {
+                flagName : 'emissionLinesPCygni',
+                description : 'Emission lines with P Cygni profile'
             }
         }
     }
