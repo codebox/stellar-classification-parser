@@ -100,6 +100,10 @@ const fs = require('fs'),
             'p' : {
                 flagName : 'unspecifiedPeculiarity',
                 description : 'Unspecified peculiarity'
+            },
+            's' : {
+                flagName : 'narrowAbsorptionLines',
+                description : 'Narrow absorption lines'
             }
         }
     }

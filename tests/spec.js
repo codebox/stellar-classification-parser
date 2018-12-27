@@ -602,6 +602,24 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("Narrow absorption lines", () => theText("Gs").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 's',
+          flags : {
+            narrowAbsorptionLines : true
+          },
+          details : [{
+            text : 's',
+            description : 'Narrow absorption lines'
+          }]
+        }
+      }));
     });
   });
 });
