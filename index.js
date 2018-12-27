@@ -96,6 +96,10 @@ const fs = require('fs'),
             'nn' : {
                 flagName : 'veryBroadAbsorptionFeatures',
                 description : 'Very broad absorption features'
+            },
+            'p' : {
+                flagName : 'unspecifiedPeculiarity',
+                description : 'Unspecified peculiarity'
             }
         }
     }

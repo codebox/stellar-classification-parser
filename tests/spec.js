@@ -584,6 +584,24 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("Unspecified peculiarity", () => theText("Gp").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'p',
+          flags : {
+            unspecifiedPeculiarity : true
+          },
+          details : [{
+            text : 'p',
+            description : 'Unspecified peculiarity'
+          }]
+        }
+      }));
     });
   });
 });
