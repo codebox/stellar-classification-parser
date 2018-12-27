@@ -38,7 +38,39 @@ const fs = require('fs'),
         "d" : "V",
         "sg" : "I",
         "g" : "III"
-    };
+    },
+    SUFFIXES = {
+        class : {
+            ':' : {
+                flagName : 'uncertain',
+                description : 'Uncertain spectral class'
+            },
+            'e' : {
+                flagName : 'emissionLines',
+                description : 'Emission lines'
+            }
+        },
+        luminosity : {
+            ':' : {
+                flagName : 'uncertain',
+                description : 'Uncertain luminosity'
+            },
+            'e' : {
+                flagName : 'emissionLines',
+                description : 'Emission lines'
+            }
+        },
+        global : {
+            '...' : {
+                flagName : 'undescribed',
+                description : 'Undescribed peculiarities'
+            },
+            'comp' : {
+                flagName : 'compositeSpectrum',
+                description : 'Composite spectrum'
+            }
+        }
+    }
 
 function assert(stmt) {
     if (!stmt) {
@@ -137,11 +169,13 @@ function populateClassDetails(tree, result) {
             return result;
         });
     }
+    function getClassSuffixes() {
+        return search(tree, 'CLASSES_SUFFIX');
+    }
 
     const classDetails = result.class = {},
         classes = getClasses();
-
-    classDetails.text = collectText(searchForOne(tree, 'CLASSES'));
+    classDetails.text = collectText(searchForOne(tree, 'CLASSES_BODY'));
 
     if (isClassRange()) {
         const classRangeChildNodes = search(tree, 'CLASS_RANGE')[0];
@@ -199,6 +233,24 @@ function populateClassDetails(tree, result) {
         assert(classes.length === 1);
         classDetails.value = classes[0];
     }
+
+    const classSuffixes = getClassSuffixes();
+    if (classSuffixes.length) {
+        const peculiarities = classDetails.peculiarities = {
+            text : classSuffixes.join(''),
+            flags : {},
+            details : []
+        };
+        classSuffixes.forEach(suffix => {
+            const details = SUFFIXES.class[suffix];
+            assert(details);
+            peculiarities.flags[details.flagName] = true;
+            peculiarities.details.push({
+                text : suffix,
+                description : details.description
+            });
+        });
+    }
 }
 
 function populateLuminosityDetails(tree, result) {
@@ -223,6 +275,9 @@ function populateLuminosityDetails(tree, result) {
             description : LUMINOSITY_DESCRIPTIONS[value]
         }
     }
+    function getLuminositySuffixes() {
+        return search(tree, 'LUMINOSITIES_SUFFIX');
+    }
 
     if (hasLuminosityPrefix()) {
         const luminosityDetails = result.luminosity = {},
@@ -236,7 +291,7 @@ function populateLuminosityDetails(tree, result) {
         const luminosityDetails = result.luminosity = {},
             luminosities = getLuminosityValues();
 
-        luminosityDetails.text = collectText(searchForOne(tree, 'LUMINOSITIES'));
+        luminosityDetails.text = collectText(searchForOne(tree, 'LUMINOSITIES_BODY'));
 
         if (isLuminosityRange()) {
             assert(luminosities.length === 2);
@@ -257,6 +312,48 @@ function populateLuminosityDetails(tree, result) {
         }
     }
 
+    const luminositySuffixes = getLuminositySuffixes();
+    if (luminositySuffixes.length) {
+        const peculiarities = result.luminosity.peculiarities = {
+            text : luminositySuffixes.join(''),
+            flags : {},
+            details : []
+        };
+        luminositySuffixes.forEach(suffix => {
+            const details = SUFFIXES.luminosity[suffix];
+            assert(details);
+            peculiarities.flags[details.flagName] = true;
+            peculiarities.details.push({
+                text : suffix,
+                description : details.description
+            });
+        });
+    }
+}
+
+function populatePeculiarities(tree, result) {
+    function getSuffixes() {
+        return search(tree, 'SUFFIX');
+    }
+
+    const suffixes = getSuffixes();
+    if (suffixes.length) {
+        result.peculiarities = {
+            text : suffixes.join(''),
+            flags : {},
+            details : []
+        };
+
+        suffixes.forEach(suffix => {
+            const details = SUFFIXES.global[suffix];
+            assert(details);
+            result.peculiarities.flags[details.flagName] = true;
+            result.peculiarities.details.push({
+                text : suffix,
+                description : details.description
+            });
+        });
+    }
 }
 
 function flattenParseTree(tree) {
@@ -334,6 +431,7 @@ function transformParseTree(tree) {
 
     populateClassDetails(tree, result);
     populateLuminosityDetails(tree, result);
+    populatePeculiarities(tree, result);
 
     return result;
 }
@@ -343,17 +441,20 @@ function parse(text) {
 
     if (!result) {
         const parseResult = parser.parse(text);
-        //console.log(JSON.stringify(parseResult))
+        console.log('before flattening',JSON.stringify(parseResult))
 
         if (parseResult && !parseResult.remainder) {
             flattenParseTree(parseResult.tree)
-            //console.log(JSON.stringify(parseResult))
-            cache[text] = transformParseTree(parseResult.tree);
+            console.log('after flattening',JSON.stringify(parseResult))
+            result = transformParseTree(parseResult.tree);
         } else {
-            cache[text] = UNABLE_TO_PARSE;
+            result = UNABLE_TO_PARSE;
         }
+        cache[text] = result
     }
+
     if (result !== UNABLE_TO_PARSE) {
+        console.log('result=',JSON.stringify(result));
         return result;
     }
 }

@@ -1,4 +1,6 @@
 describe("Classifier", function() {
+  "use strict";
+
   const parse = require('../index').parse;
 
   function theText(txt) {
@@ -321,4 +323,123 @@ describe("Classifier", function() {
     }));
   });
 
+  describe("handles suffixes correctly", () => {
+    describe("after class", () => {
+      it("uncertainty", () => theText("G5:").isParsedToExactly({
+        class : {
+          text : 'G5',
+          value : {
+            letter : 'G',
+            number : 5
+          },
+          peculiarities : {
+            text : ':',
+            flags : {
+              uncertain : true
+            },
+            details : [{
+              text : ':',
+              description : 'Uncertain spectral class'
+            }]
+          }
+        }
+      }));
+    });
+    describe("after luminosity", () => {
+      it("uncertainty", () => theText("G5II:").isParsedToExactly({
+        class : {
+          text: 'G5',
+          value: {
+            letter: 'G',
+            number: 5
+          }
+        },
+        luminosity : {
+          text : 'II',
+          value : {
+            luminosityClass : 'II',
+            description : 'Bright Giant'
+          },
+          peculiarities : {
+            text : ':',
+            flags : {
+              uncertain : true
+            },
+            details : [{
+              text : ':',
+              description : 'Uncertain luminosity'
+            }]
+          }
+        }
+      }));
+      it("emission lines", () => theText("GIIIe").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        luminosity : {
+          text: 'III',
+          value: {
+            luminosityClass: 'III',
+            description: 'Giant'
+          },
+          peculiarities: {
+            text: 'e',
+            flags: {
+              emissionLines: true
+            },
+            details: [{
+              text: 'e',
+              description: 'Emission lines'
+            }]
+          }
+        }
+      }));
+    });
+    describe("after everything", () => {
+      it("undescribed peculiarities", () => theText("G...").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : '...',
+          flags : {
+            undescribed : true
+          },
+          details : [{
+            text : '...',
+            description : 'Undescribed peculiarities'
+          }]
+        }
+      }));
+      it("composite spectrum", () => theText("A-F comp").isParsedToExactly({
+        class : {
+          text: 'A-F',
+          range: {
+            from: {
+              letter: 'A'
+            },
+            to: {
+              letter: 'F'
+            }
+          }
+        },
+        peculiarities : {
+          text : 'comp',
+          flags : {
+            compositeSpectrum : true
+          },
+          details : [{
+            text : 'comp',
+            description : 'Composite spectrum'
+          }]
+        }
+      }));
+    });
+  });
 });
