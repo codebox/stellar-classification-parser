@@ -92,6 +92,10 @@ const fs = require('fs'),
             'n' : {
                 flagName : 'broadAbsorptionDueToSpinning',
                 description : 'Broad absorption due to spinning'
+            },
+            'nn' : {
+                flagName : 'veryBroadAbsorptionFeatures',
+                description : 'Very broad absorption features'
             }
         }
     }

@@ -566,6 +566,24 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("Very broad absorption features", () => theText("Gnn").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'nn',
+          flags : {
+            veryBroadAbsorptionFeatures : true
+          },
+          details : [{
+            text : 'nn',
+            description : 'Very broad absorption features'
+          }]
+        }
+      }));
     });
   });
 });
