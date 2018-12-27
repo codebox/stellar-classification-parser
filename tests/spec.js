@@ -638,6 +638,42 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("Variable spectral feature (abbreviated)", () => theText("Gv").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'v',
+          flags : {
+            variableSpectralFeature : true
+          },
+          details : [{
+            text : 'v',
+            description : 'Variable spectral feature'
+          }]
+        }
+      }));
+      it("Variable spectral feature", () => theText("Gvar").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'var',
+          flags : {
+            variableSpectralFeature : true
+          },
+          details : [{
+            text : 'var',
+            description : 'Variable spectral feature'
+          }]
+        }
+      }));
     });
   });
 });

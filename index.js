@@ -40,19 +40,19 @@ const fs = require('fs'),
         "g" : "III"
     },
     SUFFIXES = {
-        class : {
+        class : populateDuplicates({
             ':' : {
                 flagName : 'uncertain',
                 description : 'Uncertain spectral class'
             }
-        },
-        luminosity : {
+        }),
+        luminosity : populateDuplicates({
             ':' : {
                 flagName : 'uncertain',
                 description : 'Uncertain luminosity'
             }
-        },
-        global : {
+        }),
+        global : populateDuplicates({
             '...' : {
                 flagName : 'undescribed',
                 description : 'Undescribed peculiarities'
@@ -108,10 +108,24 @@ const fs = require('fs'),
             'sh' : {
                 flagName : 'shellStarFeatures',
                 description : 'Shell star features'
-            }
-        }
-    }
+            },
+            'v' : {
+                flagName : 'variableSpectralFeature',
+                description : 'Variable spectral feature'
+            },
+            'var' : 'v'
+        })
+    };
 
+function populateDuplicates(obj) {
+    Object.keys(obj).forEach(k => {
+        const v = obj[k];
+        if (typeof v === 'string' && obj[v]) {
+            obj[k] = obj[v];
+        }
+    });
+    return Object.freeze(obj);
+}
 function assert(stmt, msg) {
     if (!stmt) {
         throw new Error('Assertion failed ' + (msg || ''))
@@ -284,6 +298,7 @@ function populateClassDetails(tree, result) {
         classSuffixes.forEach(suffix => {
             const details = SUFFIXES.class[suffix];
             assert(details);
+
             peculiarities.flags[details.flagName] = true;
             peculiarities.details.push({
                 text : suffix,
@@ -362,6 +377,7 @@ function populateLuminosityDetails(tree, result) {
         luminositySuffixes.forEach(suffix => {
             const details = SUFFIXES.luminosity[suffix];
             assert(details);
+
             peculiarities.flags[details.flagName] = true;
             peculiarities.details.push({
                 text : suffix,
@@ -386,8 +402,8 @@ function populatePeculiarities(tree, result) {
 
         suffixes.forEach(suffix => {
             const details = SUFFIXES.global[suffix];
-
             assert(details, suffix);
+
             result.peculiarities.flags[details.flagName] = true;
             result.peculiarities.details.push({
                 text : suffix,
