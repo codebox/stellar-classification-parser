@@ -458,6 +458,60 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("N III and He II emission", () => theText("Gf").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'f',
+          flags : {
+            n3He2Emission : true
+          },
+          details : [{
+            text : 'f',
+            description : 'N III and He II emission'
+          }]
+        }
+      }));
+      it("N III and weak/missing He II emission", () => theText("G(f)").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : '(f)',
+          flags : {
+            n3WeakHe2Emission : true
+          },
+          details : [{
+            text : '(f)',
+            description : 'N III and weak/missing He II emission'
+          }]
+        }
+      }));
+      it("He II and weak N III emission", () => theText("G((f))").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : '((f))',
+          flags : {
+            he2WeakN3Emission : true
+          },
+          details : [{
+            text : '((f))',
+            description : 'He II and weak N III emission'
+          }]
+        }
+      }));
     });
   });
 });

@@ -68,6 +68,18 @@ const fs = require('fs'),
             'eq' : {
                 flagName : 'emissionLinesPCygni',
                 description : 'Emission lines with P Cygni profile'
+            },
+            'f' : {
+                flagName : 'n3He2Emission',
+                description : 'N III and He II emission'
+            },
+            '(f)' : {
+                flagName : 'n3WeakHe2Emission',
+                description : 'N III and weak/missing He II emission'
+            },
+            '((f))' : {
+                flagName : 'he2WeakN3Emission',
+                description : 'He II and weak N III emission'
             }
         }
     }
