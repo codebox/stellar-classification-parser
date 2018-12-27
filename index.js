@@ -80,13 +80,17 @@ const fs = require('fs'),
             '((f))' : {
                 flagName : 'he2WeakN3Emission',
                 description : 'He II and weak N III emission'
+            },
+            'He wk' : {
+                flagName : 'weakHeliumLines',
+                description : 'Weak Helium lines'
             }
         }
     }
 
-function assert(stmt) {
+function assert(stmt, msg) {
     if (!stmt) {
-        throw new Error('Assertion failed')
+        throw new Error('Assertion failed ' + (msg || ''))
     }
 }
 
@@ -345,20 +349,21 @@ function populateLuminosityDetails(tree, result) {
 
 function populatePeculiarities(tree, result) {
     function getSuffixes() {
-        return search(tree, 'SUFFIX');
+        return search(tree, 'SUFFIX').map(suffix => Array.isArray(suffix) ? suffix.join(' ') : suffix);
     }
 
     const suffixes = getSuffixes();
     if (suffixes.length) {
         result.peculiarities = {
-            text : suffixes.join(''),
+            text : suffixes.join(' '),
             flags : {},
             details : []
         };
 
         suffixes.forEach(suffix => {
             const details = SUFFIXES.global[suffix];
-            assert(details);
+
+            assert(details, suffix);
             result.peculiarities.flags[details.flagName] = true;
             result.peculiarities.details.push({
                 text : suffix,

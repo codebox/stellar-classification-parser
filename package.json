@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/codebox/stellar-classification-parser#readme",
   "dependencies": {
-    "top-down-parser": "^1.0.0"
+    "top-down-parser": "^1.0.1"
   }
 }

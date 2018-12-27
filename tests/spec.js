@@ -512,6 +512,24 @@ describe("Classifier", function() {
           }]
         }
       }));
+      fit("Weak Helium lines", () => theText("G He wk").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'He wk',
+          flags : {
+            weakHeliumLines : true
+          },
+          details : [{
+            text : 'He wk',
+            description : 'Weak Helium lines'
+          }]
+        }
+      }));
     });
   });
 });
