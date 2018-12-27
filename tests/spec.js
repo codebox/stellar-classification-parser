@@ -784,5 +784,47 @@ describe("Classifier", function() {
         }));
       });
     });
+    fit("multiple peculiarities", () => theText("G He wk pvarHe (Sr)...").isParsedToExactly({
+      class : {
+        text: 'G',
+        value: {
+          letter: 'G'
+        }
+      },
+      peculiarities : {
+        text : "He wk p var ... He Sr",
+        flags : {
+          weakHeliumLines : true,
+          unspecifiedPeculiarity : true,
+          variableSpectralFeature : true,
+          undescribed : true,
+          elements : {
+            helium : true,
+            strontium : true
+          }
+        },
+        details : [
+          {
+            text : "He wk",
+            description : "Weak Helium lines"
+          },{
+            text : "p",
+            description : "Unspecified peculiarity"
+          },{
+            text : "var",
+            description : "Variable spectral feature"
+          },{
+            text : "...",
+            description : "Undescribed peculiarities"
+          },{
+            text : "He",
+            description : "Abnormally strong spectral lines of Helium"
+          },{
+            text : "Sr",
+            description : "Abnormally strong spectral lines of Strontium"
+          }
+        ]
+      }
+    }));
   });
 });
