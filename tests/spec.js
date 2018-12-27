@@ -372,31 +372,6 @@ describe("Classifier", function() {
           }
         }
       }));
-      it("emission lines", () => theText("GIIIe").isParsedToExactly({
-        class : {
-          text: 'G',
-          value: {
-            letter: 'G'
-          }
-        },
-        luminosity : {
-          text: 'III',
-          value: {
-            luminosityClass: 'III',
-            description: 'Giant'
-          },
-          peculiarities: {
-            text: 'e',
-            flags: {
-              emissionLines: true
-            },
-            details: [{
-              text: 'e',
-              description: 'Emission lines'
-            }]
-          }
-        }
-      }));
     });
     describe("after everything", () => {
       it("undescribed peculiarities", () => theText("G...").isParsedToExactly({
@@ -437,6 +412,31 @@ describe("Classifier", function() {
           details : [{
             text : 'comp',
             description : 'Composite spectrum'
+          }]
+        }
+      }));
+      it("emission lines", () => theText("GIIIe").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        luminosity : {
+          text: 'III',
+          value: {
+            luminosityClass: 'III',
+            description: 'Giant'
+          }
+        },
+        peculiarities: {
+          text: 'e',
+          flags: {
+            emissionLines: true
+          },
+          details: [{
+            text: 'e',
+            description: 'Emission lines'
           }]
         }
       }));

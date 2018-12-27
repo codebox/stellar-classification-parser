@@ -44,20 +44,12 @@ const fs = require('fs'),
             ':' : {
                 flagName : 'uncertain',
                 description : 'Uncertain spectral class'
-            },
-            'e' : {
-                flagName : 'emissionLines',
-                description : 'Emission lines'
             }
         },
         luminosity : {
             ':' : {
                 flagName : 'uncertain',
                 description : 'Uncertain luminosity'
-            },
-            'e' : {
-                flagName : 'emissionLines',
-                description : 'Emission lines'
             }
         },
         global : {
@@ -68,6 +60,10 @@ const fs = require('fs'),
             'comp' : {
                 flagName : 'compositeSpectrum',
                 description : 'Composite spectrum'
+            },
+            'e' : {
+                flagName : 'emissionLines',
+                description : 'Emission lines'
             }
         }
     }
