@@ -674,6 +674,60 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("Weak lines (w)", () => theText("Gw").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'w',
+          flags : {
+            weakLines : true
+          },
+          details : [{
+            text : 'w',
+            description : 'Weak lines'
+          }]
+        }
+      }));
+      it("Weak lines (wl)", () => theText("Gwl").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'wl',
+          flags : {
+            weakLines : true
+          },
+          details : [{
+            text : 'wl',
+            description : 'Weak lines'
+          }]
+        }
+      }));
+      it("Weak lines (wk)", () => theText("Gwk").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'wk',
+          flags : {
+            weakLines : true
+          },
+          details : [{
+            text : 'wk',
+            description : 'Weak lines'
+          }]
+        }
+      }));
     });
   });
 });

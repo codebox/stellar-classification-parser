@@ -25,7 +25,7 @@ LUMINOSITY              -> 0 | I | Ia+ | Ia | Iab | Ib | II LUMINOSITY_MODIFIER 
 LUMINOSITY_MODIFIER     -> a | b | ε
 
 SUFFIXES                -> SUFFIX SUFFIXES | ε
-SUFFIX                  -> ... | comp | e | eq | f | (f) | ((f)) | He wk | m | n | nn | p | s | sh | v | var | ELEMENT
+SUFFIX                  -> ... | comp | e | eq | f | (f) | ((f)) | He wk | m | n | nn | p | s | sh | v | var | w | wk | wl | ELEMENT
 ELEMENT                 -> Sr | He | Eu | Si | Hg | Mn | Cr | Fe | K | ( ELEMENT )
 
 CLASSES_SUFFIXES        -> CLASSES_SUFFIX CLASSES_SUFFIXES | ε

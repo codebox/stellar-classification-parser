@@ -113,7 +113,13 @@ const fs = require('fs'),
                 flagName : 'variableSpectralFeature',
                 description : 'Variable spectral feature'
             },
-            'var' : 'v'
+            'var' : 'v',
+            'w' : {
+                flagName : 'weakLines',
+                description : 'Weak lines'
+            },
+            'wl' : 'w',
+            'wk' : 'w'
         })
     };
 
