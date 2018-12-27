@@ -512,7 +512,7 @@ describe("Classifier", function() {
           }]
         }
       }));
-      fit("Weak Helium lines", () => theText("G He wk").isParsedToExactly({
+      it("Weak Helium lines", () => theText("G He wk").isParsedToExactly({
         class : {
           text: 'G',
           value: {
@@ -527,6 +527,24 @@ describe("Classifier", function() {
           details : [{
             text : 'He wk',
             description : 'Weak Helium lines'
+          }]
+        }
+      }));
+      it("Enhanced metal features", () => theText("Gm").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'm',
+          flags : {
+            enhancedMetalFeatures : true
+          },
+          details : [{
+            text : 'm',
+            description : 'Enhanced metal features'
           }]
         }
       }));

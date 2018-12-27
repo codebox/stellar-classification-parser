@@ -84,6 +84,10 @@ const fs = require('fs'),
             'He wk' : {
                 flagName : 'weakHeliumLines',
                 description : 'Weak Helium lines'
+            },
+            'm' : {
+                flagName : 'enhancedMetalFeatures',
+                description : 'Enhanced metal features'
             }
         }
     }
