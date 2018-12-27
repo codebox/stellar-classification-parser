@@ -88,6 +88,10 @@ const fs = require('fs'),
             'm' : {
                 flagName : 'enhancedMetalFeatures',
                 description : 'Enhanced metal features'
+            },
+            'n' : {
+                flagName : 'broadAbsorptionDueToSpinning',
+                description : 'Broad absorption due to spinning'
             }
         }
     }

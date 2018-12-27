@@ -548,6 +548,24 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("Broad absorption due to spinning", () => theText("Gn").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'n',
+          flags : {
+            broadAbsorptionDueToSpinning : true
+          },
+          details : [{
+            text : 'n',
+            description : 'Broad absorption due to spinning'
+          }]
+        }
+      }));
     });
   });
 });
