@@ -620,6 +620,24 @@ describe("Classifier", function() {
           }]
         }
       }));
+      it("Shell star features", () => theText("Gsh").isParsedToExactly({
+        class : {
+          text: 'G',
+          value: {
+            letter: 'G'
+          }
+        },
+        peculiarities : {
+          text : 'sh',
+          flags : {
+            shellStarFeatures : true
+          },
+          details : [{
+            text : 'sh',
+            description : 'Shell star features'
+          }]
+        }
+      }));
     });
   });
 });

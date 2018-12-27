@@ -104,6 +104,10 @@ const fs = require('fs'),
             's' : {
                 flagName : 'narrowAbsorptionLines',
                 description : 'Narrow absorption lines'
+            },
+            'sh' : {
+                flagName : 'shellStarFeatures',
+                description : 'Shell star features'
             }
         }
     }
