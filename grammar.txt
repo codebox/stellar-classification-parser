@@ -1,6 +1,6 @@
 START                   -> CLASS_AND_LUMINOSITY SUFFIXES
 
-CLASS_AND_LUMINOSITY    -> LUMINOSITY_PREFIX CLASSES | CLASSES LUMINOSITIES | CLASSES
+CLASS_AND_LUMINOSITY    -> LUMINOSITY_PREFIX CLASSES | CLASSES LUMINOSITIES | CLASSES | S_TYPE
 
 CLASSES                 -> CLASSES_BODY CLASSES_SUFFIXES
 CLASSES_BODY            -> CLASS_RANGE | CLASS_CHOICE | CLASS_COMBINATION | CLASS
@@ -10,7 +10,7 @@ CLASS_COMBINATION       -> CLASS + CLASS
 
 CLASS                   -> CLASS_LETTER CLASS_NUMBER
 
-CLASS_LETTER            -> O | B | A | F | G | K | M
+CLASS_LETTER            -> WN | WC | O | B | A | F | G | K | M | C
 
 CLASS_NUMBER            -> NUMBER | NUMBER . NUMBER | ε
 NUMBER                  -> 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
@@ -33,3 +33,11 @@ CLASSES_SUFFIX          -> :
 
 LUMINOSITIES_SUFFIXES   -> LUMINOSITIES_SUFFIX LUMINOSITIES_SUFFIXES | ε
 LUMINOSITIES_SUFFIX     -> :
+
+S_TYPE                  -> S_TYPE_BASE_CLASS S_TYPE_ABUNDANCE
+S_TYPE_BASE_CLASS       -> S | S ZERO_TO_TEN
+S_TYPE_ABUNDANCE        -> ONE_TO_NINE | , ONE_TO_NINE | / ONE_TO_TEN | * ONE_TO_FIVE | ε
+ONE_TO_FIVE             -> 1 | 2 | 3 | 4 | 5
+ONE_TO_NINE             -> 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+ONE_TO_TEN              -> 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+ZERO_TO_TEN             -> 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10

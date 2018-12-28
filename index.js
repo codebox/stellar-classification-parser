@@ -271,84 +271,102 @@ function populateClassDetails(tree, result) {
         return search(tree, 'CLASSES_SUFFIX');
     }
 
-    const classDetails = result.class = {},
-        classes = getClasses();
-    classDetails.text = collectText(searchForOne(tree, 'CLASSES_BODY'));
+    const classes = getClasses();
+    if (classes.length) {
+        const classDetails = result.class = {};
 
-    if (isClassRange()) {
-        const classRangeChildNodes = search(tree, 'CLASS_RANGE')[0];
-        assert(classRangeChildNodes.length === 3);
+        classDetails.text = collectText(searchForOne(tree, 'CLASSES_BODY'));
 
-        const classCount = classes.length;
-        assert(classCount === 1 || classCount === 2);
+        if (isClassRange()) {
+            const classRangeChildNodes = search(tree, 'CLASS_RANGE')[0];
+            assert(classRangeChildNodes.length === 3);
 
-        if (classCount === 1) {
-            // Class is of the form A3-4
-            const numberAtEndOfRange = classRangeChildNodes[2]['CLASS_NUMBER'],
-                fromClass = classes[0],
-                toClass = deepCopy(fromClass);
-            toClass.number = numberAtEndOfRange;
+            const classCount = classes.length;
+            assert(classCount === 1 || classCount === 2);
 
-            classDetails.range = {
-                from : fromClass,
-                to : toClass
-            };
+            if (classCount === 1) {
+                // Class is of the form A3-4
+                const numberAtEndOfRange = classRangeChildNodes[2]['CLASS_NUMBER'],
+                    fromClass = classes[0],
+                    toClass = deepCopy(fromClass);
+                toClass.number = numberAtEndOfRange;
 
-        } else if (classCount === 2) {
-            // Class is of the form A3-A4
-            classDetails.range = {
-                from : classes[0],
-                to : classes[1]
-            };
+                classDetails.range = {
+                    from: fromClass,
+                    to: toClass
+                };
+
+            } else if (classCount === 2) {
+                // Class is of the form A3-A4
+                classDetails.range = {
+                    from: classes[0],
+                    to: classes[1]
+                };
+            }
+        } else if (isClassChoice()) {
+            const classChoiceChildNodes = search(tree, 'CLASS_CHOICE')[0];
+            assert(classChoiceChildNodes.length === 3);
+
+            const classCount = classes.length;
+            assert(classCount === 1 || classCount === 2);
+
+            if (classCount === 1) {
+                // Class is of the form A3/4
+                const numberAtEndOfRange = classChoiceChildNodes[2]['CLASS_NUMBER'],
+                    class1 = classes[0],
+                    class2 = deepCopy(class1);
+                class2.number = numberAtEndOfRange;
+                classDetails.choice = [
+                    class1,
+                    class2
+                ];
+
+            } else if (classCount === 2) {
+                // Class is of the form A3/A4
+                classDetails.choice = [
+                    classes[0],
+                    classes[1]
+                ];
+            }
+
+        } else {
+            assert(classes.length === 1);
+            classDetails.value = classes[0];
         }
-    } else if (isClassChoice()) {
-        const classChoiceChildNodes = search(tree, 'CLASS_CHOICE')[0];
-        assert(classChoiceChildNodes.length === 3);
 
-        const classCount = classes.length;
-        assert(classCount === 1 || classCount === 2);
+        const classSuffixes = getClassSuffixes();
+        if (classSuffixes.length) {
+            const peculiarities = classDetails.peculiarities = {
+                text: classSuffixes.join(''),
+                flags: {},
+                details: []
+            };
+            classSuffixes.forEach(suffix => {
+                const details = SUFFIXES.class[suffix];
+                assert(details);
 
-        if (classCount === 1) {
-            // Class is of the form A3/4
-            const numberAtEndOfRange = classChoiceChildNodes[2]['CLASS_NUMBER'],
-                class1 = classes[0],
-                class2 = deepCopy(class1);
-            class2.number = numberAtEndOfRange;
-            classDetails.choice = [
-                class1,
-                class2
-            ];
-
-        } else if (classCount === 2) {
-            // Class is of the form A3/A4
-            classDetails.choice = [
-                classes[0],
-                classes[1]
-            ];
+                peculiarities.flags[details.flagName] = true;
+                peculiarities.details.push({
+                    text: suffix,
+                    description: details.description
+                });
+            });
         }
+    }
+}
 
-    } else {
-        assert(classes.length === 1);
-        classDetails.value = classes[0];
+function populateSTypeClassDetails(tree, result) {
+    function isSType(){
+        return search(tree, 'S_TYPE').length > 0;
     }
 
-    const classSuffixes = getClassSuffixes();
-    if (classSuffixes.length) {
-        const peculiarities = classDetails.peculiarities = {
-            text : classSuffixes.join(''),
-            flags : {},
-            details : []
+    if (isSType()) {
+        const classDetails = result.class = {
+            value : {
+                letter : 'S'
+            }
         };
-        classSuffixes.forEach(suffix => {
-            const details = SUFFIXES.class[suffix];
-            assert(details);
-
-            peculiarities.flags[details.flagName] = true;
-            peculiarities.details.push({
-                text : suffix,
-                description : details.description
-            });
-        });
+        classDetails.text = collectText(searchForOne(tree, 'S_TYPE'));
     }
 }
 
@@ -565,6 +583,7 @@ function transformParseTree(tree) {
     const result = {};
 
     populateClassDetails(tree, result);
+    populateSTypeClassDetails(tree, result);
     populateLuminosityDetails(tree, result);
     populatePeculiarities(tree, result);
 

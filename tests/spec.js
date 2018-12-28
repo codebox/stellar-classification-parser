@@ -25,6 +25,8 @@ describe("Classifier", function() {
         }
       };
     }
+    it("WN is valid", () => theText("WN").isParsedToExactly(resultWithLetter('WN')));
+    it("WC is valid", () => theText("WC").isParsedToExactly(resultWithLetter('WC')));
     it("O is valid", () => theText("O").isParsedToExactly(resultWithLetter('O')));
     it("B is valid", () => theText("B").isParsedToExactly(resultWithLetter('B')));
     it("A is valid", () => theText("A").isParsedToExactly(resultWithLetter('A')));
@@ -32,6 +34,7 @@ describe("Classifier", function() {
     it("G is valid", () => theText("G").isParsedToExactly(resultWithLetter('G')));
     it("K is valid", () => theText("K").isParsedToExactly(resultWithLetter('K')));
     it("M is valid", () => theText("M").isParsedToExactly(resultWithLetter('M')));
+    it("C is valid", () => theText("C").isParsedToExactly(resultWithLetter('C')));
 
     it("X is invalid", () => theText("X").cannotBeParsed());
     it("Q is invalid", () => theText("Q").cannotBeParsed());
@@ -784,7 +787,7 @@ describe("Classifier", function() {
         }));
       });
     });
-    fit("multiple peculiarities", () => theText("G He wk pvarHe (Sr)...").isParsedToExactly({
+    it("multiple peculiarities", () => theText("G He wk pvarHe (Sr)...").isParsedToExactly({
       class : {
         text: 'G',
         value: {
@@ -824,6 +827,16 @@ describe("Classifier", function() {
             description : "Abnormally strong spectral lines of Strontium"
           }
         ]
+      }
+    }));
+  });
+  describe('S-Type stars', () => {
+    it('type only', () => theText("S").isParsedToExactly({
+      class : {
+        text: 'S',
+        value: {
+          letter: 'S'
+        }
       }
     }));
   });
