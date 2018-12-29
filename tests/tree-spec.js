@@ -1,7 +1,8 @@
 describe("Tree", function() {
     "use strict";
 
-    const tree = require('../tree').tree;
+    const tree = require('../tree').tree,
+        EPSILON = 'e';
 
     describe("find method", () => {
         it("finds all occurrences of specified value", () => {
@@ -39,8 +40,7 @@ describe("Tree", function() {
         });
 
         it("ignores epsilon values", () => {
-            const EPSILON = 'e',
-                t = tree({
+            const t = tree({
                     X : EPSILON,
                     a : [{X:EPSILON}],
                     b : [{X:[EPSILON]}]
@@ -89,4 +89,62 @@ describe("Tree", function() {
             expect(tree({a:'1', b:[2,{c:'3'}], d:{e:[4,5]}}).collectText()).toEqual('12345');
         });
     });
+
+    describe("on... functions", () => {
+        let callValues;
+
+        function handler(v) {
+            callValues.push(v);
+        }
+        beforeEach(() => {
+            callValues = [];
+        });
+
+        describe("onValue", () => {
+            it("calls function once for each match", () => {
+                tree({
+                    X : [{a:1}],
+                    b : {X:2},
+                    c : [{X:3}],
+                    d : {X : {e : 4}},
+                    f : {X:EPSILON}
+                }, EPSILON).onValue('X', handler);
+                expect(callValues).toEqual([[{a:1}], 2, 3, {e:4}])
+            });
+            it("never calls function if no matches", () => {
+                tree({
+                    a : 1
+                }).onValue('X', handler);
+                expect(callValues).toEqual([]);
+            });
+        });
+
+        describe("onOnlyValue", () => {
+            it("calls function for single occurrence of specified value", () => {
+                tree({a : 1, b : 2, X : 3}).onOnlyValue('X', handler);
+                expect(callValues).toEqual([3]);
+            });
+            it("throws error if specified value cant be found", () => {
+                expect(() => tree({a: 1, b: 2, c : [{d:3}]}).onOnlyValue('X', handler)).toThrowError(Error);
+            });
+            it("throws error if specified value appears multiple times", () => {
+                expect(() => tree({a: 1, X: 2, c : [{X:3}]}).onOnlyValue('X', handler)).toThrowError(Error);
+            });
+        });
+
+        describe("onOptionalValue method", () => {
+            it("calls function for single occurrence of specified value", () => {
+                tree({a : 1, b : 2, X : 3}).onOptionalValue('X', handler);
+                expect(callValues).toEqual([3]);
+            });
+            it("does not call function if specified value cant be found", () => {
+                tree({a: 1, b: 2, c : [{d:3}]}).onOptionalValue('X', handler);
+                expect(callValues).toEqual([]);
+            });
+            it("throws error if specified value appears multiple times", () => {
+                expect(() => tree({a: 1, X: 2, c : [{X:3}]}).onOptionalValue('X', handler)).toThrowError(Error);
+            });
+        });
+    });
+
 });

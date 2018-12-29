@@ -40,7 +40,7 @@ function tree(root, epsilon = 'ε') {
         return text;
     }
 
-    const EMPTY = {
+    const EMPTY = Object.freeze({
         find(name) {
             return [];
         },
@@ -61,8 +61,9 @@ function tree(root, epsilon = 'ε') {
         },
         get() {
             return;
-        }
-    };
+        },
+        empty : true
+    });
 
     return {
         find(name) {
@@ -97,15 +98,19 @@ function tree(root, epsilon = 'ε') {
         },
 
         onValue(childName, fn) {
-
+            search(root, childName).forEach(fn);
+            return this;
         },
 
         onOnlyValue(childName, fn) {
-
+            fn(this.findOnly(childName));
         },
 
         onOptionalValue(childName, fn) {
-
+            const value = this.findOptional(childName);
+            if (!value.empty) {
+                fn(value.get());
+            }
         },
 
         toString() {
