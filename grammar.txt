@@ -36,7 +36,8 @@ LUMINOSITIES_SUFFIX     -> :
 
 S_TYPE                  -> S_TYPE_BASE_CLASS S_TYPE_ABUNDANCE
 S_TYPE_BASE_CLASS       -> S | S ZERO_TO_TEN
-S_TYPE_ABUNDANCE        -> ONE_TO_NINE | , ONE_TO_NINE | / ONE_TO_TEN | * ONE_TO_FIVE | ε
+S_TYPE_ABUNDANCE        -> ZRO_TIO_RATIO | / ONE_TO_TEN | * ONE_TO_FIVE | ε
+ZRO_TIO_RATIO           -> , ONE_TO_NINE
 ONE_TO_FIVE             -> 1 | 2 | 3 | 4 | 5
 ONE_TO_NINE             -> 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 ONE_TO_TEN              -> 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10

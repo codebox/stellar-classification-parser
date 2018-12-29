@@ -359,14 +359,38 @@ function populateSTypeClassDetails(tree, result) {
     function isSType(){
         return search(tree, 'S_TYPE').length > 0;
     }
-
+    function getBaseNumber(){
+        const baseValues = search(tree, 'S_TYPE_BASE_CLASS')[0];
+        if (baseValues.length > 1) {
+            assert(baseValues.length === 2);
+            assert(baseValues[1].ZERO_TO_TEN)
+            return Number(baseValues[1].ZERO_TO_TEN)
+        }
+    }
+    function getZrOTiORatio() {
+        const ratioParts = search(tree, 'ZRO_TIO_RATIO');
+        if (ratioParts.length){
+            assert(ratioParts[0].length === 2, ratioParts);
+            return Number(ratioParts[0][1].ONE_TO_NINE);
+        }
+    }
     if (isSType()) {
         const classDetails = result.class = {
             value : {
                 letter : 'S'
             }
         };
-        classDetails.text = collectText(searchForOne(tree, 'S_TYPE'));
+        classDetails.text = search(tree, 'S_TYPE').map(collectText).join('');
+
+        const baseNumber = getBaseNumber();
+        if (baseNumber !== undefined) {
+            result.class.value.number = baseNumber;
+        }
+
+        const zrOTiORatio = getZrOTiORatio();
+        if (zrOTiORatio !== undefined) {
+            result.class.value.ZrOTiORatio = zrOTiORatio;
+        }
     }
 }
 
