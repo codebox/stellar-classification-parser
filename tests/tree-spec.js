@@ -51,9 +51,9 @@ describe("Tree", function() {
 
     describe("findOnly method", () => {
         it("finds single occurrence of specified value", () => {
-            expect(tree({a : 1, b : 2, X : 3}).findOnly('X')).toEqual(3);
-            expect(tree({a : 1, b : 2, c : [{X:3}]}).findOnly('X')).toEqual(3);
-            expect(tree({a : 1, b : 2, c : {X:3}}).findOnly('X')).toEqual(3);
+            expect(tree({a : 1, b : 2, X : 3}).findOnly('X').get()).toEqual(3);
+            expect(tree({a : 1, b : 2, c : [{X:3}]}).findOnly('X').get()).toEqual(3);
+            expect(tree({a : 1, b : 2, c : {X:3}}).findOnly('X').get()).toEqual(3);
         });
         it("throws error if specified value cant be found", () => {
             expect(() => tree({a: 1, b: 2, c : [{d:3}]}).findOnly('X')).toThrowError(Error);
@@ -134,7 +134,7 @@ describe("Tree", function() {
 
         describe("onOptionalValue method", () => {
             it("calls function for single occurrence of specified value", () => {
-                tree({a : 1, b : 2, X : 3}).onOptionalValue('X', handler);
+                tree({a : 1, b : 2, X : 3}).onOptionalValue('X', t => handler(t.get()));
                 expect(callValues).toEqual([3]);
             });
             it("does not call function if specified value cant be found", () => {

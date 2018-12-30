@@ -73,7 +73,7 @@ function tree(root, epsilon = 'ε') {
         findOnly(name) {
             const matches = search(root, name);
             if (matches.length === 1){
-                return matches[0];
+                return tree(matches[0]);
             }
             throw new Error(`Expected single match for findOnly(${name}) but instead found ${matches.length}, matches were ${JSON.stringify(matches)}`);
         },
@@ -93,6 +93,21 @@ function tree(root, epsilon = 'ε') {
 
         },
 
+        children() { //TODO tests
+            if (Array.isArray(root)) {
+                return root.map(tree);
+            }
+            return [];
+        },
+
+        child(index) { //TODO tests
+            const children = this.children();
+            if (index >= children.length) {
+                throw new Error(`Unable to return child with index ${index}, the children array only contains ${children.length} items. Array is ${JSON.stringify(children)}`);
+            }
+            return children[index];
+        },
+
         collectText() {
             return collectText(root);
         },
@@ -103,13 +118,13 @@ function tree(root, epsilon = 'ε') {
         },
 
         onOnlyValue(childName, fn) {
-            fn(this.findOnly(childName));
+            fn(this.findOnly(childName).get());
         },
 
         onOptionalValue(childName, fn) {
             const value = this.findOptional(childName);
             if (!value.empty) {
-                fn(value.get());
+                fn(value);
             }
         },
 
@@ -124,29 +139,3 @@ function tree(root, epsilon = 'ε') {
 }
 
 exports.tree = tree;
-
-/*
-    a :
-
- */
-
-/*
- node
- find(name) -> [node]
- findOnly(name) -> err or node
- findOptional(name) -> node or EMPTY (a special node which contains nowt)
- collectText() -> string values concat together
- onValue(childName,fn) - calls fn for each matching child
- onOnlyValue(childName,fn) - err or calls fn for only matching value
- onOptionalValue(childName,fn) - calls fn if single value exists
- epsilons are ignored (not returned)
-
- root.findOptional('CLASS_CHOICE').find('CLASS').map(cl => {
- const result = {}
- cl.onOnlyValue('CLASS_LETTER', v => result.letter = v);
- cl.onOptionalValue('CLASS_NUMBER', v => v.onOnlyValue('NUMBER', v => result.number = Number(v)));
- return result;
- })
-
-
- */

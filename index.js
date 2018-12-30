@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require('fs'),
+    tree = require('./tree').tree,
     grammarText = fs.readFileSync('./grammar.txt').toString(),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
@@ -249,44 +250,39 @@ function collectText(node) {
 
 function populateClassDetails(tree, result) {
     function isClassRange() {
-        return search(tree, 'CLASS_RANGE').length > 0;
+        return !tree.findOptional('CLASS_RANGE').empty;
     }
     function isClassChoice() {
-        return search(tree, 'CLASS_CHOICE').length > 0;
+        return !tree.findOptional('CLASS_CHOICE').empty;
     }
     function getClasses() {
-        return search(tree, 'CLASS').map(classNode => {
+        return tree.find('CLASS').map(classTree => {
             const result = {};
-            classNode.forEach(classPath => {
-                if (classPath.hasOwnProperty('CLASS_LETTER')){
-                    result.letter = classPath['CLASS_LETTER'];
-                } else if (classPath.hasOwnProperty('CLASS_NUMBER')){
-                    result.number = classPath['CLASS_NUMBER'];
-                }
-            });
+
+            classTree.onOnlyValue('CLASS_LETTER', letter => result.letter = letter[0]);
+            classTree.onOptionalValue('CLASS_NUMBER', classNumber => result.number = Number(classNumber.collectText()));
+
             return result;
         });
     }
     function getClassSuffixes() {
-        return search(tree, 'CLASSES_SUFFIX');
+        return tree.find('CLASSES_SUFFIX');
     }
 
     const classes = getClasses();
     if (classes.length) {
         const classDetails = result.class = {};
 
-        classDetails.text = collectText(searchForOne(tree, 'CLASSES_BODY'));
+        classDetails.text = tree.findOnly('CLASSES_BODY').collectText();
 
         if (isClassRange()) {
-            const classRangeChildNodes = search(tree, 'CLASS_RANGE')[0];
-            assert(classRangeChildNodes.length === 3);
-
-            const classCount = classes.length;
+            const classRange = tree.findOnly('CLASS_RANGE'),
+                classCount = classes.length;
             assert(classCount === 1 || classCount === 2);
 
             if (classCount === 1) {
                 // Class is of the form A3-4
-                const numberAtEndOfRange = classRangeChildNodes[2]['CLASS_NUMBER'],
+                const numberAtEndOfRange = Number(classRange.child(2).collectText()),
                     fromClass = classes[0],
                     toClass = deepCopy(fromClass);
                 toClass.number = numberAtEndOfRange;
@@ -304,15 +300,13 @@ function populateClassDetails(tree, result) {
                 };
             }
         } else if (isClassChoice()) {
-            const classChoiceChildNodes = search(tree, 'CLASS_CHOICE')[0];
-            assert(classChoiceChildNodes.length === 3);
-
-            const classCount = classes.length;
+            const classChoice = tree.findOnly('CLASS_CHOICE'),
+                classCount = classes.length;
             assert(classCount === 1 || classCount === 2);
 
             if (classCount === 1) {
                 // Class is of the form A3/4
-                const numberAtEndOfRange = classChoiceChildNodes[2]['CLASS_NUMBER'],
+                const numberAtEndOfRange = Number(classChoice.child(2).collectText()),
                     class1 = classes[0],
                     class2 = deepCopy(class1);
                 class2.number = numberAtEndOfRange;
@@ -533,83 +527,13 @@ function populatePeculiarities(tree, result) {
     }
 }
 
-function flattenParseTree(tree) {
-    function walk(node, handler = n => n) {
-        Object.keys(node).forEach(key => {
-            const value = node[key];
-            if (typeof value === 'object') {
-                walk(value, handler);
-            }
-        });
-        Object.keys(node).forEach(key => {
-            handler(node, key, node[key]);
-        });
-    }
-
-    function trimSingleElementArrays(obj, key, val) {
-        if (Array.isArray(val) && val.length === 1 && typeof val[0] === 'string') {
-            obj[key] = val[0];
-        }
-    }
-
-    function removeEpsilons(obj, key, val) {
-        if (val === EPSILON) {
-            delete obj[key];
-        }
-    }
-
-    function removeRangeAndChoiceDelimiters(obj, key, val) {
-        if (val === '/' || val === '-') {
-            delete obj[key];
-        }
-    }
-
-    function removeEmptyObjects(obj, key, val) {
-        if (Object.keys(val).length === 0 && val.constructor === Object) {
-            delete obj[key];
-        } else if (Array.isArray(val) && val.length === 0) {
-            delete obj[key];
-        }
-    }
-
-    function filterArrays(obj, key, val) {
-        function isEmptyObject(o) {
-            return Object.keys(o).length === 0 && o.constructor === Object
-        }
-        function isEmptyArray(o) {
-            return Array.isArray(o) && o.length === 0;
-        }
-        function isEmptyValue(o){
-            return o === undefined || o === null || o === '';
-        }
-        if (Array.isArray(val)) {
-            obj[key] = val.filter(o => !isEmptyObject(o) && !isEmptyArray(o) && !isEmptyValue(o));
-        }
-    }
-
-    function flattenClassNumbers(obj, key, val) {
-        if (key === 'CLASS_NUMBER') {
-            obj[key] = Number(collectText(obj[key]));
-        }
-    }
-
-    walk(tree, removeEpsilons);
-    //walk(tree, removeRangeAndChoiceDelimiters);
-    walk(tree, filterArrays);
-    walk(tree, removeEmptyObjects);
-    walk(tree, filterArrays);
-    walk(tree, trimSingleElementArrays);
-    walk(tree, filterArrays);
-    walk(tree, flattenClassNumbers);
-}
-
 function transformParseTree(tree) {
     const result = {};
 
     populateClassDetails(tree, result);
-    populateSTypeClassDetails(tree, result);
-    populateLuminosityDetails(tree, result);
-    populatePeculiarities(tree, result);
+    // populateSTypeClassDetails(tree, result);
+    // populateLuminosityDetails(tree, result);
+    // populatePeculiarities(tree, result);
 
     return result;
 }
@@ -619,12 +543,10 @@ function parse(text) {
 
     if (!result) {
         const parseResult = parser.parse(text);
-        console.log('before flattening',JSON.stringify(parseResult))
 
         if (parseResult && !parseResult.remainder) {
-            flattenParseTree(parseResult.tree)
-            console.log('after flattening',JSON.stringify(parseResult))
-            result = transformParseTree(parseResult.tree);
+            const treeWrapper = tree(parseResult.tree);
+            result = transformParseTree(treeWrapper);
         } else {
             result = UNABLE_TO_PARSE;
         }
@@ -632,7 +554,7 @@ function parse(text) {
     }
 
     if (result !== UNABLE_TO_PARSE) {
-        console.log('result=',JSON.stringify(result));
+        console.log('result=', JSON.stringify(result));
         return result;
     }
 }
