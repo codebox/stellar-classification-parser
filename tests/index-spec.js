@@ -871,10 +871,44 @@ describe("Classifier", function() {
           }
         };
       }
+      function cOAbundance(ratio) {
+        return {
+          class : {
+            text: 'S5/' + ratio,
+            value: {
+              letter: 'S',
+              number : 5,
+              CORatio : ratio
+            }
+          }
+        };
+      }
+      function zrOAbundance(strength) {
+        return {
+          class : {
+            text: 'S5*' + strength,
+            value: {
+              letter: 'S',
+              number : 5,
+              ZrOStrength : strength
+            }
+          }
+        };
+      }
       it("S5,1", () => theText("S5,1").isParsedToExactly(zrOTiOAbundance(1)));
       it("S5,9", () => theText("S5,9").isParsedToExactly(zrOTiOAbundance(9)));
       it("S5,0", () => theText("S5,0").cannotBeParsed());
       it("S5,10", () => theText("S5,10").cannotBeParsed());
+
+      it("S5/1", () => theText("S5/1").isParsedToExactly(cOAbundance(1)));
+      it("S5/10", () => theText("S5/10").isParsedToExactly(cOAbundance(10)));
+      it("S5/0", () => theText("S5/0").cannotBeParsed());
+      it("S5/11", () => theText("S5/11").cannotBeParsed());
+
+      it("S5*1", () => theText("S5*1").isParsedToExactly(zrOAbundance(1)));
+      it("S5*5", () => theText("S5*5").isParsedToExactly(zrOAbundance(5)));
+      it("S5*0", () => theText("S5*0").cannotBeParsed());
+      it("S5*6", () => theText("S5*6").cannotBeParsed());
     });
   });
 });

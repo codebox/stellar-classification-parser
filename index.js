@@ -287,15 +287,27 @@ function populateSTypeClassDetails(tree, result) {
         return !tree.findOptional('S_TYPE').empty;
     }
     function getBaseNumber(){
-        const zeroToTen = tree.findOptional('ZERO_TO_TEN');
+        const zeroToTen = tree.findOptional('S_TYPE').findOptional('ZERO_TO_TEN');
         if (!zeroToTen.empty) {
             return Number(zeroToTen.get());
         }
     }
     function getZrOTiORatio() {
-        const oneToNine = tree.findOptional('ONE_TO_NINE');
+        const oneToNine = tree.findOptional('ZRO_TIO_RATIO').findOptional('ONE_TO_NINE');
         if (!oneToNine.empty) {
             return Number(oneToNine.get());
+        }
+    }
+    function getCORatio() {
+        const oneToTen = tree.findOptional('C_O_RATIO').findOptional('ONE_TO_TEN');
+        if (!oneToTen.empty) {
+            return Number(oneToTen.get());
+        }
+    }
+    function getZrOStrength() {
+        const oneToFive = tree.findOptional('ZRO_STRENGTH').findOptional('ONE_TO_FIVE');
+        if (!oneToFive.empty) {
+            return Number(oneToFive.get());
         }
     }
     if (isSType()) {
@@ -314,6 +326,16 @@ function populateSTypeClassDetails(tree, result) {
         const zrOTiORatio = getZrOTiORatio();
         if (zrOTiORatio !== undefined) {
             result.class.value.ZrOTiORatio = zrOTiORatio;
+        }
+
+        const cORatio = getCORatio();
+        if (cORatio !== undefined) {
+            result.class.value.CORatio = cORatio;
+        }
+
+        const zrOStrength = getZrOStrength();
+        if (zrOStrength !== undefined) {
+            result.class.value.ZrOStrength = zrOStrength;
         }
     }
 }
