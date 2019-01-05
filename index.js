@@ -47,6 +47,28 @@ const fs = require('fs'),
                 description : 'Uncertain spectral class'
             }
         }),
+        whiteDwarf : populateDuplicates({
+            'P' : {
+                flagName : 'magneticPolarized',
+                description : 'Magnetic white dwarf with detectable polarization'
+            },
+            'E' : {
+                flagName : 'emissionLines',
+                description : 'Emission lines present'
+            },
+            'H' : {
+                flagName : 'magneticUnpolarized',
+                description : 'Magnetic white dwarf without detectable polarization'
+            },
+            'V' : {
+                flagName : 'variable',
+                description : 'Variable'
+            },
+            'PEC' : {
+                flagName : 'peculiarities',
+                description : 'Peculiarities exist'
+            }
+        }),
         luminosity : populateDuplicates({
             ':' : {
                 flagName : 'uncertain',
@@ -340,6 +362,60 @@ function populateSTypeClassDetails(tree, result) {
     }
 }
 
+function populateWhiteDwarfDetails(tree, result) {
+    function isWhiteDwarf(){
+        return !tree.findOptional('WHITE_DWARF').empty;
+    }
+    function getType(){
+        return tree.findOptional('DWARF_TYPES').collectText();
+    }
+    function getTemperature(){
+        const temperature = tree.findOptional('DWARF_TEMPERATURE').collectText();
+        if (temperature) {
+            return Number(temperature);
+        }
+    }
+    function getPeculiarities(){
+        return tree.find('DWARF_PECULIARITY').map(p => p.get());
+    }
+
+    if (isWhiteDwarf()) {
+        const classDetails = result.class = {
+            value : {
+                letter : 'D'
+            }
+        };
+        classDetails.text = 'D' + tree.findOptional('DWARF_TYPES').collectText() + tree.findOptional('DWARF_TEMPERATURE').collectText();;
+
+        const dwarfType = getType();
+        if (dwarfType) {
+            result.class.value.dwarfType = dwarfType;
+        }
+
+        const temperature = getTemperature();
+        if (temperature) {
+            result.class.value.dwarfTemperature = temperature;
+        }
+
+        const peculiarities = getPeculiarities();
+        if (peculiarities.length) {
+            result.peculiarities = {
+                text : tree.findOnly('DWARF_PECULIARITIES').collectText(),
+                flags : {},
+                details : []
+            };
+            peculiarities.map(p => p[0]).forEach(peculiarity => {
+                const details = SUFFIXES.whiteDwarf[peculiarity];
+                result.peculiarities.flags[details.flagName] = true;
+                result.peculiarities.details.push({
+                    text : peculiarity,
+                    description : details.description
+                });
+            })
+        }
+    }
+}
+
 function populateLuminosityDetails(tree, result) {
     function hasLuminosityPrefix() {
         return !tree.findOptional('LUMINOSITY_PREFIX').empty;
@@ -481,6 +557,7 @@ function transformParseTree(tree) {
 
     populateClassDetails(tree, result);
     populateSTypeClassDetails(tree, result);
+    populateWhiteDwarfDetails(tree, result);
     populateLuminosityDetails(tree, result);
     populatePeculiarities(tree, result);
 
