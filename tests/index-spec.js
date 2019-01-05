@@ -851,11 +851,10 @@ describe("Classifier", function() {
           }
         };
       }
-      it("S0", () => theText("S0").isParsedToExactly(typeAndNumberOnly(0)));
-      it("S5", () => theText("S5").isParsedToExactly(typeAndNumberOnly(5)));
-      it("S10", () => theText("S10").isParsedToExactly(typeAndNumberOnly(10)));
-
-      it("S11", () => theText("S11").cannotBeParsed());
+      it("S0",   () => theText("S0").isParsedToExactly(typeAndNumberOnly(0)));
+      it("S5",   () => theText("S5").isParsedToExactly(typeAndNumberOnly(5)));
+      it("S10",  () => theText("S10").isParsedToExactly(typeAndNumberOnly(10)));
+      it("S11",  () => theText("S11").cannotBeParsed());
       it("S1.5", () => theText("S1.5").cannotBeParsed());
     });
     describe('type, number and abundance', () => {
@@ -871,6 +870,11 @@ describe("Classifier", function() {
           }
         };
       }
+      it("S5,1",  () => theText("S5,1").isParsedToExactly(zrOTiOAbundance(1)));
+      it("S5,9",  () => theText("S5,9").isParsedToExactly(zrOTiOAbundance(9)));
+      it("S5,0",  () => theText("S5,0").cannotBeParsed());
+      it("S5,10", () => theText("S5,10").cannotBeParsed());
+
       function cOAbundance(ratio) {
         return {
           class : {
@@ -883,6 +887,11 @@ describe("Classifier", function() {
           }
         };
       }
+      it("S5/1",  () => theText("S5/1").isParsedToExactly(cOAbundance(1)));
+      it("S5/10", () => theText("S5/10").isParsedToExactly(cOAbundance(10)));
+      it("S5/0",  () => theText("S5/0").cannotBeParsed());
+      it("S5/11", () => theText("S5/11").cannotBeParsed());
+
       function zrOAbundance(strength) {
         return {
           class : {
@@ -895,16 +904,6 @@ describe("Classifier", function() {
           }
         };
       }
-      it("S5,1", () => theText("S5,1").isParsedToExactly(zrOTiOAbundance(1)));
-      it("S5,9", () => theText("S5,9").isParsedToExactly(zrOTiOAbundance(9)));
-      it("S5,0", () => theText("S5,0").cannotBeParsed());
-      it("S5,10", () => theText("S5,10").cannotBeParsed());
-
-      it("S5/1", () => theText("S5/1").isParsedToExactly(cOAbundance(1)));
-      it("S5/10", () => theText("S5/10").isParsedToExactly(cOAbundance(10)));
-      it("S5/0", () => theText("S5/0").cannotBeParsed());
-      it("S5/11", () => theText("S5/11").cannotBeParsed());
-
       it("S5*1", () => theText("S5*1").isParsedToExactly(zrOAbundance(1)));
       it("S5*5", () => theText("S5*5").isParsedToExactly(zrOAbundance(5)));
       it("S5*0", () => theText("S5*0").cannotBeParsed());
