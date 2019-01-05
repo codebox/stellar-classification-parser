@@ -416,6 +416,23 @@ function populateWhiteDwarfDetails(tree, result) {
     }
 }
 
+function populateCarbonStarDetails(tree, result) {
+    function isCarbonStar(){
+        return !tree.findOptional('CARBON_STAR').empty;
+    }
+
+    if (isCarbonStar()) {
+        const type = tree.findOnly('CARBON_STAR').collectText();
+
+        result.class = {
+            text : type,
+            value : {
+                letter : type
+            }
+        };
+    }
+}
+
 function populateLuminosityDetails(tree, result) {
     function hasLuminosityPrefix() {
         return !tree.findOptional('LUMINOSITY_PREFIX').empty;
@@ -558,6 +575,7 @@ function transformParseTree(tree) {
     populateClassDetails(tree, result);
     populateSTypeClassDetails(tree, result);
     populateWhiteDwarfDetails(tree, result);
+    populateCarbonStarDetails(tree, result);
     populateLuminosityDetails(tree, result);
     populatePeculiarities(tree, result);
 

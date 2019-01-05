@@ -34,7 +34,6 @@ describe("Classifier", function() {
         it("G is valid", () => theText("G").isParsedToExactly(resultWithLetter('G')));
         it("K is valid", () => theText("K").isParsedToExactly(resultWithLetter('K')));
         it("M is valid", () => theText("M").isParsedToExactly(resultWithLetter('M')));
-        it("C is valid", () => theText("C").isParsedToExactly(resultWithLetter('C')));
 
         it("X is invalid", () => theText("X").cannotBeParsed());
         it("Q is invalid", () => theText("Q").cannotBeParsed());
@@ -910,7 +909,7 @@ describe("Classifier", function() {
             it("S5*6", () => theText("S5*6").cannotBeParsed());
         });
     });
-    fdescribe('White Dwarfs', () => {
+    describe('White Dwarfs', () => {
         it('basic type only', () => theText("D").isParsedToExactly({
             class : {
                 text: 'D',
@@ -1095,5 +1094,25 @@ describe("Classifier", function() {
             }));
         });
     });
+    describe('carbon stars', () => {
+        function carbonStarOfType(type) {
+            return {
+                class : {
+                    text: type,
+                    value: {
+                        letter: type
+                    }
+                }
+            };
+        }
+        it('C-R',  () => theText("C-R").isParsedToExactly(carbonStarOfType('C-R')));
+        it('C-N',  () => theText("C-N").isParsedToExactly(carbonStarOfType('C-N')));
+        it('C-J',  () => theText("C-J").isParsedToExactly(carbonStarOfType('C-J')));
+        it('C-H',  () => theText("C-H").isParsedToExactly(carbonStarOfType('C-H')));
+        it('C-Hd', () => theText("C-Hd").isParsedToExactly(carbonStarOfType('C-Hd')));
 
+        it('C-X',    () => theText("C-X").cannotBeParsed());
+        it('C-RI',   () => theText("C-RI").cannotBeParsed());
+        it('C-Rvar', () => theText("C-Rvar").cannotBeParsed());
+    });
 });
