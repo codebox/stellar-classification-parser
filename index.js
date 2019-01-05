@@ -266,7 +266,7 @@ function populateClassDetails(tree, result) {
         });
     }
     function getClassSuffixes() {
-        return tree.find('CLASSES_SUFFIX');
+        return tree.find('CLASSES_SUFFIX').map(s => s.get()[0]);
     }
 
     const classes = getClasses();
@@ -337,7 +337,7 @@ function populateClassDetails(tree, result) {
             };
             classSuffixes.forEach(suffix => {
                 const details = SUFFIXES.class[suffix];
-                assert(details);
+                assert(details, suffix);
 
                 peculiarities.flags[details.flagName] = true;
                 peculiarities.details.push({
@@ -351,21 +351,18 @@ function populateClassDetails(tree, result) {
 
 function populateSTypeClassDetails(tree, result) {
     function isSType(){
-        return search(tree, 'S_TYPE').length > 0;
+        return !tree.findOptional('S_TYPE').empty;
     }
     function getBaseNumber(){
-        const baseValues = search(tree, 'S_TYPE_BASE_CLASS')[0];
-        if (baseValues.length > 1) {
-            assert(baseValues.length === 2);
-            assert(baseValues[1].ZERO_TO_TEN)
-            return Number(baseValues[1].ZERO_TO_TEN)
+        const zeroToTen = tree.findOptional('ZERO_TO_TEN');
+        if (!zeroToTen.empty) {
+            return Number(zeroToTen.get());
         }
     }
     function getZrOTiORatio() {
-        const ratioParts = search(tree, 'ZRO_TIO_RATIO');
-        if (ratioParts.length){
-            assert(ratioParts[0].length === 2, ratioParts);
-            return Number(ratioParts[0][1].ONE_TO_NINE);
+        const oneToNine = tree.findOptional('ONE_TO_NINE');
+        if (!oneToNine.empty) {
+            return Number(oneToNine.get());
         }
     }
     if (isSType()) {
@@ -374,7 +371,7 @@ function populateSTypeClassDetails(tree, result) {
                 letter : 'S'
             }
         };
-        classDetails.text = search(tree, 'S_TYPE').map(collectText).join('');
+        classDetails.text = tree.findOnly('S_TYPE').collectText();
 
         const baseNumber = getBaseNumber();
         if (baseNumber !== undefined) {
@@ -390,19 +387,19 @@ function populateSTypeClassDetails(tree, result) {
 
 function populateLuminosityDetails(tree, result) {
     function hasLuminosityPrefix() {
-        return search(tree, 'LUMINOSITY_PREFIX').length > 0;
+        return !tree.findOptional('LUMINOSITY_PREFIX').empty;
     }
     function hasLuminositySuffix() {
-        return search(tree, 'LUMINOSITIES').length > 0;
+        return !tree.findOptional('LUMINOSITIES').empty;
     }
     function isLuminosityRange() {
-        return search(tree, 'LUMINOSITY_RANGE').length > 0;
+        return !tree.findOptional('LUMINOSITY_RANGE').empty;
     }
     function isLuminosityChoice() {
-        return search(tree, 'LUMINOSITY_CHOICE').length > 0;
+        return !tree.findOptional('LUMINOSITY_CHOICE').empty;
     }
     function getLuminosityValues() {
-        return search(tree, 'LUMINOSITY').map(collectText);
+        return tree.find('LUMINOSITY').map(t => t.collectText());
     }
     function buildLuminosity(value) {
         return {
@@ -411,12 +408,12 @@ function populateLuminosityDetails(tree, result) {
         }
     }
     function getLuminositySuffixes() {
-        return search(tree, 'LUMINOSITIES_SUFFIX');
+        return tree.find('LUMINOSITIES_SUFFIX').map(s => s.get()[0]);
     }
 
     if (hasLuminosityPrefix()) {
         const luminosityDetails = result.luminosity = {},
-            prefix = searchForOne(tree, 'LUMINOSITY_PREFIX'),
+            prefix = tree.findOnly('LUMINOSITY_PREFIX').get()[0],
             value = LUMINOSITY_PREFIX_TRANSLATION[prefix];
 
         luminosityDetails.text = prefix;
@@ -426,7 +423,7 @@ function populateLuminosityDetails(tree, result) {
         const luminosityDetails = result.luminosity = {},
             luminosities = getLuminosityValues();
 
-        luminosityDetails.text = collectText(searchForOne(tree, 'LUMINOSITIES_BODY'));
+        luminosityDetails.text = tree.findOnly('LUMINOSITIES_BODY').collectText();
 
         if (isLuminosityRange()) {
             assert(luminosities.length === 2);
@@ -456,7 +453,7 @@ function populateLuminosityDetails(tree, result) {
         };
         luminositySuffixes.forEach(suffix => {
             const details = SUFFIXES.luminosity[suffix];
-            assert(details);
+            assert(details, suffix);
 
             peculiarities.flags[details.flagName] = true;
             peculiarities.details.push({
@@ -469,18 +466,15 @@ function populateLuminosityDetails(tree, result) {
 
 function populatePeculiarities(tree, result) {
     function getSuffixes() {
-        return search(tree, 'SUFFIX')
-            .map(suffix => Array.isArray(suffix) ? suffix : [suffix])
-            .map(suffixArray => suffixArray.filter(el => typeof el ==='string'))
-            .filter(suffixArray => suffixArray.length)
-            .map(suffixArray => suffixArray.join(' '))
+        return tree.find('SUFFIX').filter(s => s.get().every(i => typeof i === 'string')).map(s => s.get().join(' '));
     }
 
     function getElements() {
-        return search(tree, 'ELEMENT').filter(el => typeof el === 'string');
+        return tree.find('ELEMENT').map(e => e.get()[0]);
     }
 
     const suffixes = getSuffixes();
+
     if (suffixes.length) {
         result.peculiarities = {
             text : suffixes.join(' '),
@@ -522,7 +516,7 @@ function populatePeculiarities(tree, result) {
             result.peculiarities.details.push({
                 text : element,
                 description : `Abnormally strong spectral lines of ${details.description}`
-            })
+            });
         });
     }
 }
@@ -531,9 +525,9 @@ function transformParseTree(tree) {
     const result = {};
 
     populateClassDetails(tree, result);
-    // populateSTypeClassDetails(tree, result);
-    // populateLuminosityDetails(tree, result);
-    // populatePeculiarities(tree, result);
+    populateSTypeClassDetails(tree, result);
+    populateLuminosityDetails(tree, result);
+    populatePeculiarities(tree, result);
 
     return result;
 }
@@ -545,6 +539,7 @@ function parse(text) {
         const parseResult = parser.parse(text);
 
         if (parseResult && !parseResult.remainder) {
+            console.log('parseResult=', JSON.stringify(parseResult));
             const treeWrapper = tree(parseResult.tree);
             result = transformParseTree(treeWrapper);
         } else {
