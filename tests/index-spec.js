@@ -161,6 +161,38 @@ describe("Classifier", function() {
                 }
             });
         });
+        it("combination of two letters handled correctly", () => {
+            theText("A+F").isParsedToExactly({
+                class : {
+                    text : 'A+F',
+                    combination : [
+                        {
+                            letter : 'A'
+                        },
+                        {
+                            letter : 'F'
+                        }
+                    ]
+                }
+            });
+        });
+        it("combination of two letters with numbers handled correctly", () => {
+            theText("A2+F3").isParsedToExactly({
+                class : {
+                    text : 'A2+F3',
+                    combination : [
+                        {
+                            letter : 'A',
+                            number : 2
+                        },
+                        {
+                            letter : 'F',
+                            number : 3
+                        }
+                    ]
+                }
+            });
+        });
     });
 
     describe("handles single luminosities correctly", function() {

@@ -1,3 +1,5 @@
 .idea
 *.iml
 node_modules
+check.js
+types.txt

@@ -210,6 +210,9 @@ function populateClassDetails(tree, result) {
     function isClassChoice() {
         return !tree.findOptional('CLASS_CHOICE').empty;
     }
+    function isClassCombination() {
+        return !tree.findOptional('CLASS_COMBINATION').empty;
+    }
     function getClasses() {
         return tree.find('CLASS').map(classTree => {
             const result = {};
@@ -277,6 +280,15 @@ function populateClassDetails(tree, result) {
                     classes[1]
                 ];
             }
+
+        } else if (isClassCombination()) {
+            const classCount = classes.length;
+            assert(classCount === 2);
+
+            classDetails.combination = [
+                classes[0],
+                classes[1]
+            ];
 
         } else {
             assert(classes.length === 1);
@@ -589,7 +601,7 @@ function parse(text) {
         const parseResult = parser.parse(text);
 
         if (parseResult && !parseResult.remainder) {
-            console.log('parseResult=', JSON.stringify(parseResult));
+            //console.log('parseResult=', JSON.stringify(parseResult));
             const treeWrapper = tree(parseResult.tree);
             result = transformParseTree(treeWrapper);
         } else {
@@ -599,7 +611,7 @@ function parse(text) {
     }
 
     if (result !== UNABLE_TO_PARSE) {
-        console.log('result=', JSON.stringify(result));
+        //console.log('result=', JSON.stringify(result));
         return result;
     }
 }
