@@ -6,8 +6,8 @@ To run tests, ensure that Jasmine is installed:
 
     npm install -g jasmine
 
-and then run Jasmine against the `spec.js` file from the root of the project:
+and then run following command from the root of the project:
 
-    jasmine tests/spec.js
+    jasmine 
     
     
