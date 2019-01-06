@@ -4,10 +4,10 @@
   "description": "A parser for star classification codes",
   "main": "index.js",
   "directories": {
-    "test": "tests"
+    "test": "spec"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine"
   },
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
   "keywords": [
     "astronomy"
   ],
-  "author": "Rob Dawson <rob@codebox.org.uk> (http://codebox.org.uk)",
+  "author": "Rob Dawson <rob@codebox.net> (https://codebox.net)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/codebox/stellar-classification-parser/issues"
