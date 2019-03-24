@@ -1147,4 +1147,141 @@ describe("Classifier", function() {
         it('C-RI',   () => theText("C-RI").cannotBeParsed());
         it('C-Rvar', () => theText("C-Rvar").cannotBeParsed());
     });
+
+    describe("additional data", function() {
+        describe("should add data when flag is set", () => {
+            it("letter only", () => {
+                const data = parse('A', true).data;
+                expect(data).toEqual({
+                    mass: 7.2,
+                    luminosityRelative: 1290,
+                    radiusRelative: 16.5,
+                    temperature: 8650,
+                    colourIndexBv: 0.05,
+                    absoluteMagnitude: -2.8,
+                    bolometricCorrection: -0.23,
+                    bolometricMagnitude: -3.03,
+                    colour: {
+                        r: 194,
+                        g: 210,
+                        b: 255
+                    }
+                })
+            });
+
+            it("letter and number only", () => {
+                const data = parse('A3', true).data;
+                expect(data).toEqual({
+                    mass: 8.1,
+                    luminosityRelative: 1660,
+                    radiusRelative: 16.7,
+                    temperature: 9150,
+                    colourIndexBv: -0.04,
+                    absoluteMagnitude: -3,
+                    bolometricCorrection: -0.3,
+                    bolometricMagnitude: -3.3,
+                    colour: {
+                        r: 190,
+                        g: 207,
+                        b: 255
+                    }
+                })
+            });
+
+            it("letter, number and luminosity", () => {
+                const data = parse('A3V', true).data;
+                expect(data).toEqual({
+                    mass: 2.4,
+                    luminosityRelative: 28.9,
+                    radiusRelative: 2.2,
+                    temperature: 9150,
+                    colourIndexBv: -0.04,
+                    absoluteMagnitude: 1.4,
+                    bolometricCorrection: -0.3,
+                    bolometricMagnitude: 1.1,
+                    colour: {
+                        r: 191,
+                        g: 207,
+                        b: 255
+                    }
+                })
+            });
+
+            it("letter and number range", () => {
+                const data = parse('A3-A7', true).data;
+                expect(data).toEqual({
+                    mass: 7.65,
+                    luminosityRelative: 1385,
+                    radiusRelative: 16.95,
+                    temperature: 8650,
+                    colourIndexBv: 0.05,
+                    absoluteMagnitude: -2.85,
+                    bolometricCorrection: -0.235,
+                    bolometricMagnitude: -3.085,
+                    colour: {
+                        r: 194,
+                        g: 210,
+                        b: 255
+                    }
+                })
+            });
+
+            it("letter and number choice", () => {
+                const data = parse('A3/A9', true).data;
+                expect(data).toEqual({
+                    mass: 7.6,
+                    luminosityRelative: 1315,
+                    radiusRelative: 17.5,
+                    temperature: 8400,
+                    colourIndexBv: 0.1,
+                    absoluteMagnitude: -2.8,
+                    bolometricCorrection: -0.21,
+                    bolometricMagnitude: -3.01,
+                    colour: {
+                        r: 196,
+                        g: 212,
+                        b: 255
+                    }
+                })
+            });
+
+            it("luminosity range", () => {
+                const data = parse('A3II-IV', true).data;
+                expect(data).toEqual({
+                    mass: 6.2,
+                    luminosityRelative: 850.9,
+                    radiusRelative: 9.675,
+                    temperature: 9150,
+                    colourIndexBv: -0.04,
+                    absoluteMagnitude: -1,
+                    bolometricCorrection: -0.3,
+                    bolometricMagnitude: -1.3,
+                    colour: {
+                        r: 190,
+                        g: 206,
+                        b: 255
+                    }
+                })
+            });
+
+            it("luminosity choice", () => {
+                const data = parse('A3II/III', true).data;
+                expect(data).toEqual({
+                    mass: 7.15,
+                    luminosityRelative: 873.5,
+                    radiusRelative: 10.27,
+                    temperature: 9150,
+                    colourIndexBv: -0.04,
+                    absoluteMagnitude: -1.4,
+                    bolometricCorrection: -0.3,
+                    bolometricMagnitude: -1.7,
+                    colour: {
+                        r: 190,
+                        g: 205,
+                        b: 255
+                    }
+                })
+            });
+        });
+    });
 });

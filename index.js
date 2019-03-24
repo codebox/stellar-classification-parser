@@ -659,11 +659,11 @@ function getData(result) {
         });
     });
 
-    return mergeDataObjects(dataObjects, n => n.toPrecision(4));
+    return mergeDataObjects(dataObjects, n => Number(n.toPrecision(4)));
 }
 
 function parse(text, augmentWithData) {
-    let result = cache[text];
+    let result = cache[`${text}_${augmentWithData}`];
 
     if (!result) {
         const parseResult = parser.parse(text);
