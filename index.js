@@ -600,13 +600,15 @@ function mergeDataObjects(dataObjects, numAdjust = n => n) {
     const result = {},
         count = dataObjects.length;
 
-    Object.keys(dataObjects[0]).forEach(key => {
-        if (typeof dataObjects[0][key] === 'object') {
-            result[key] = mergeDataObjects(dataObjects.map(dataObject => dataObject[key]), Math.round);
-        } else {
-            result[key] = numAdjust(dataObjects.reduce((a,dataObject) => a + dataObject[key], 0) / count);
-        }
-    });
+    if (count > 0) {
+        Object.keys(dataObjects[0]).forEach(key => {
+            if (typeof dataObjects[0][key] === 'object') {
+                result[key] = mergeDataObjects(dataObjects.map(dataObject => dataObject[key]), Math.round);
+            } else {
+                result[key] = numAdjust(dataObjects.reduce((a, dataObject) => a + dataObject[key], 0) / count);
+            }
+        });
+    }
 
     return result;
 }

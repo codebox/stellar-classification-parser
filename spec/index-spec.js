@@ -1282,6 +1282,31 @@ describe("Classifier", function() {
                     }
                 })
             });
+
+            it("should handle one component with no data", () => {
+                const data = parse('A3/3.5', true).data;
+                expect(data).toEqual({
+                    mass: 8.1,
+                    luminosityRelative: 1660,
+                    radiusRelative: 16.7,
+                    temperature: 9150,
+                    colourIndexBv: -0.04,
+                    absoluteMagnitude: -3,
+                    bolometricCorrection: -0.3,
+                    bolometricMagnitude: -3.3,
+                    colour: {
+                        r: 190,
+                        g: 207,
+                        b: 255
+                    }
+                })
+            });
+
+            it("should handle all components with no data", () => {
+                const data = parse('A3.5', true).data;
+                expect(data).toEqual({})
+            });
+
         });
     });
 });
