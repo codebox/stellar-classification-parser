@@ -2,6 +2,7 @@
 
 const fs = require('fs'),
     tree = require('./tree').tree,
+    dataLookup = require('./data').lookup,
     grammarText = fs.readFileSync('./grammar.txt').toString(),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
@@ -594,14 +595,80 @@ function transformParseTree(tree) {
     return result;
 }
 
-function parse(text) {
+function mergeDataObjects(dataObjects, numAdjust = n => n) {
+    const result = {},
+        count = dataObjects.length;
+
+    Object.keys(dataObjects[0]).forEach(key => {
+        if (typeof dataObjects[0][key] === 'object') {
+            result[key] = mergeDataObjects(dataObjects.map(dataObject => dataObject[key]), Math.round);
+        } else {
+            result[key] = numAdjust(dataObjects.reduce((a,dataObject) => a + dataObject[key], 0) / count);
+        }
+    });
+
+    return result;
+}
+
+function getData(result) {
+    const classes = [],
+        luminosities = [],
+        dataObjects = [];
+
+    if (result.class.value) {
+        classes.push(result.class.value);
+
+    } else if (result.class.range) {
+        const range = result.class.range;
+        classes.push(range.from);
+        classes.push(range.to);
+
+    } else if (result.class.choice) {
+        const choice = result.class.choice;
+        classes.push(choice[0]);
+        classes.push(choice[1]);
+
+    } else {
+        assert(false, JSON.stringify(result));
+    }
+
+    if (result.luminosity) {
+        if (result.luminosity.value) {
+            luminosities.push(result.luminosity.value.luminosityClass);
+
+        } else if (result.luminosity.range) {
+            luminosities.push(result.luminosity.range.from.luminosityClass);
+            luminosities.push(result.luminosity.range.to.luminosityClass);
+
+        } else if (result.luminosity.choice) {
+            luminosities.push(result.luminosity.choice[0].luminosityClass);
+            luminosities.push(result.luminosity.choice[1].luminosityClass);
+
+        } else {
+            assert(false, JSON.stringify(result));
+        }
+
+    } else {
+        luminosities.push('');
+    }
+
+    classes.forEach(clazz => {
+        luminosities.forEach(luminosity => {
+            const dataResult = dataLookup(clazz.letter, clazz.number, luminosity);
+            dataObjects.push(dataResult);
+        });
+    });
+
+    return mergeDataObjects(dataObjects, n => n.toPrecision(4));
+}
+
+function parse(text, augmentWithData) {
     let result = cache[text];
 
     if (!result) {
         const parseResult = parser.parse(text);
 
         if (parseResult && !parseResult.remainder) {
-            //console.log('parseResult=', JSON.stringify(parseResult));
             const treeWrapper = tree(parseResult.tree);
             result = transformParseTree(treeWrapper);
         } else {
@@ -611,7 +678,9 @@ function parse(text) {
     }
 
     if (result !== UNABLE_TO_PARSE) {
-        //console.log('result=', JSON.stringify(result));
+        if (augmentWithData) {
+            result.data = getData(result);
+        }
         return result;
     }
 }

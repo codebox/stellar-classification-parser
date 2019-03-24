@@ -61,6 +61,7 @@ exports.lookup = (letter, number, luminosity) => {
             }
         }
     }
+
     return NO_INFO;
 };
 
