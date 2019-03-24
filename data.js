@@ -1,6 +1,6 @@
 "use strict";
 
-const r = require('fs').readFileSync('./data.txt').toString()
+const lineObjects = require('fs').readFileSync('./data.txt').toString()
     .split('\n')
     .map(l => l.trim())
     .filter(l => l)
@@ -26,4 +26,41 @@ const r = require('fs').readFileSync('./data.txt').toString()
             }
         };
     });
-console.log(r)
+
+const lookupTree = {};
+lineObjects.forEach(obj => {
+    const {letter, number, luminosityClass} = obj,
+        letterObj = lookupTree[letter] || (lookupTree[letter] = {}),
+        numberObj = letterObj[number]  || (letterObj[number] = {});
+
+    const objClone = {...obj};
+
+    delete objClone.letter;
+    delete objClone.number;
+    delete objClone.luminosityClass;
+
+    numberObj[luminosityClass] = objClone;
+});
+
+exports.lookup = (letter, number, luminosity) => {
+    const NO_INFO = {},
+        DEFAULT_NUMBER = '5',
+        IS_WHITE_DWARF_REGEX = /^D.$/,
+        NON_WHITE_DWARF_DEFAULT_LUMINOSITY = 'II',
+        WHITE_DWARF_DEFAULT_LUMINOSITY = '',
+        letterInfo = lookupTree[letter];
+
+    if (letterInfo) {
+        const numberInfo = letterInfo[number || DEFAULT_NUMBER];
+        if (numberInfo) {
+            const isWhiteDwarf = !! letter.match(IS_WHITE_DWARF_REGEX),
+                defaultLuminosity = isWhiteDwarf ? WHITE_DWARF_DEFAULT_LUMINOSITY : NON_WHITE_DWARF_DEFAULT_LUMINOSITY,
+                data = numberInfo[luminosity || defaultLuminosity];
+            if (data) {
+                return data;
+            }
+        }
+    }
+    return NO_INFO;
+};
+
