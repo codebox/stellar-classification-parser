@@ -3,6 +3,7 @@
 const fs = require('fs'),
     tree = require('./tree').tree,
     dataLookup = require('./data').lookup,
+    NO_INFO = require('./data').NO_INFO,
     grammarText = fs.readFileSync(__dirname + '/grammar.txt').toString(),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
@@ -612,8 +613,7 @@ function mergeDataObjects(dataObjects, numAdjust = n => n) {
 
 function getData(result) {
     const classes = [],
-        luminosities = [],
-        dataObjects = [];
+        luminosities = [];
 
     if (result.class.value) {
         classes.push(result.class.value);
@@ -652,10 +652,14 @@ function getData(result) {
         luminosities.push('');
     }
 
+    const dataObjects = [];
+
     classes.forEach(clazz => {
         luminosities.forEach(luminosity => {
             const dataResult = dataLookup(clazz.letter, clazz.number, luminosity);
-            dataObjects.push(dataResult);
+            if (dataResult !== NO_INFO) {
+                dataObjects.push(dataResult);
+            }
         });
     });
 

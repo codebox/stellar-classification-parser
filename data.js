@@ -42,9 +42,11 @@ lineObjects.forEach(obj => {
     numberObj[luminosityClass] = objClone;
 });
 
+const NO_INFO = Object.freeze({});
+
+exports.NO_INFO = NO_INFO;
 exports.lookup = (letter, number, luminosity) => {
-    const NO_INFO = {},
-        DEFAULT_NUMBER = '5',
+    const DEFAULT_NUMBER = '5',
         IS_WHITE_DWARF_REGEX = /^D.$/,
         NON_WHITE_DWARF_DEFAULT_LUMINOSITY = 'II',
         WHITE_DWARF_DEFAULT_LUMINOSITY = '',
