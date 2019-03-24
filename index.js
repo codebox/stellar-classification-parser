@@ -630,6 +630,11 @@ function getData(result) {
         classes.push(choice[0]);
         classes.push(choice[1]);
 
+    } else if (result.class.combination) {
+        const combination = result.class.combination;
+        classes.push(combination[0]);
+        classes.push(combination[1]);
+
     } else {
         assert(false, JSON.stringify(result));
     }

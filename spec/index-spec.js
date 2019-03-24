@@ -1245,6 +1245,25 @@ describe("Classifier", function() {
                 })
             });
 
+            it("letter and number combination", () => {
+                const data = parse('A3+A9', true).data;
+                expect(data).toEqual({
+                    mass: 7.6,
+                    luminosityRelative: 1315,
+                    radiusRelative: 17.5,
+                    temperature: 8400,
+                    colourIndexBv: 0.1,
+                    absoluteMagnitude: -2.8,
+                    bolometricCorrection: -0.21,
+                    bolometricMagnitude: -3.01,
+                    colour: {
+                        r: 196,
+                        g: 212,
+                        b: 255
+                    }
+                })
+            });
+
             it("luminosity range", () => {
                 const data = parse('A3II-IV', true).data;
                 expect(data).toEqual({
