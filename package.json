@@ -1,6 +1,6 @@
 {
   "name": "stellar-classification-parser",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A parser for star classification codes",
   "main": "index.js",
   "directories": {
