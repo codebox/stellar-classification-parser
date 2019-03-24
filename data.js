@@ -1,6 +1,6 @@
 "use strict";
 
-const lineObjects = require('fs').readFileSync('./data.txt').toString()
+const lineObjects = require('fs').readFileSync(__dirname +  '/data.txt').toString()
     .split('\n')
     .map(l => l.trim())
     .filter(l => l)
