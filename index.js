@@ -3,7 +3,7 @@
 const fs = require('fs'),
     tree = require('./tree').tree,
     dataLookup = require('./data').lookup,
-    grammarText = fs.readFileSync('./grammar.txt').toString(),
+    grammarText = fs.readFileSync(__dirname + '/grammar.txt').toString(),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
     UNABLE_TO_PARSE = 'nope',
