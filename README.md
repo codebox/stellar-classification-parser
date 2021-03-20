@@ -33,13 +33,13 @@ I'm happy to accept pull requests if anything important is missing or incorrect.
 
 Among other things, the parser understands:
     
-    * The standard `O`, `B`, `A`, `F`, `G`, `K`, and `M` letter codes with or without numeric sub-divisions
-    * Ranges of letter/number codes e.g. `A5-6` or `A5-A6`
-    * Alternative letter/number codes e.g. `A5/A6`
-    * Combinations of letter/number codes e.g. `A5+A6`
-    *Luminosity prefixes (`sd`, `d`, `sg`, `g`) or suffixes (`0`, `I`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
-    * Luminosity suffix ranges and alternatives e.g. `O7V-VI` and `O7V/VI`
-    * Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`
-    * Codes for S-type stars including abundance indications for `ZrO/TiO`, `C/O` and `ZrO`
-    * White dwarf codes `DA`, `DB`, `DO`, `DQ`, `DZ`, `DC` and `DX` with or without numeric suffixes, as well as peculiarity codes `P`, `E`, `H`, `V`, `PEC`
-    * Carbon star types `C-R`, `C-N`, `C-J`, `C-H`, `C-Hd`
+* The standard `O`, `B`, `A`, `F`, `G`, `K`, and `M` letter codes with or without numeric sub-divisions
+* Ranges of letter/number codes e.g. `A5-6` or `A5-A6`
+* Alternative letter/number codes e.g. `A5/A6`
+* Combinations of letter/number codes e.g. `A5+A6`
+*Luminosity prefixes (`sd`, `d`, `sg`, `g`) or suffixes (`0`, `I`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
+* Luminosity suffix ranges and alternatives e.g. `O7V-VI` and `O7V/VI`
+* Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`
+* Codes for S-type stars including abundance indications for `ZrO/TiO`, `C/O` and `ZrO`
+* White dwarf codes `DA`, `DB`, `DO`, `DQ`, `DZ`, `DC` and `DX` with or without numeric suffixes, as well as peculiarity codes `P`, `E`, `H`, `V`, `PEC`
+* Carbon star types `C-R`, `C-N`, `C-J`, `C-H`, `C-Hd`
