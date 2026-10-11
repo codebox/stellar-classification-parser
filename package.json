@@ -3,6 +3,14 @@
   "version": "2.0.0",
   "description": "A parser for star classification codes",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "parser.js",
+    "tree.js",
+    "data.js",
+    "grammar.js",
+    "data-table.js"
+  ],
   "directories": {
     "test": "spec"
   },
