@@ -423,6 +423,8 @@ function populateWhiteDwarfDetails(tree, result) {
             };
             peculiarities.map(p => p[0]).forEach(peculiarity => {
                 const details = SUFFIXES.whiteDwarf[peculiarity];
+                assert(details, peculiarity);
+
                 result.peculiarities.flags[details.flagName] = true;
                 result.peculiarities.details.push({
                     text : peculiarity,
