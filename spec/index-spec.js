@@ -1355,7 +1355,7 @@ describe("Classifier", function() {
             });
 
             it("should handle one component with no data", () => {
-                const data = parse('A3/3.5', true).data;
+                const data = parse('A3V/VII', true).data;
                 expect(data).toEqual({
                     mass: 2.4,
                     luminosityRelative: 28.9,
@@ -1374,8 +1374,39 @@ describe("Classifier", function() {
             });
 
             it("should handle all components with no data", () => {
-                const data = parse('A3.5', true).data;
+                const data = parse('A3VII', true).data;
                 expect(data).toEqual({})
+            });
+
+            describe("fractional subclasses", () => {
+                it("are interpolated between the neighbouring subclasses", () => {
+                    const data = parse('A3.5', true).data;
+                    expect(data.mass).toEqual(2.25);
+                    expect(data.temperature).toEqual(9025);
+                    expect(data.colour).toEqual({r: 194, g: 209, b: 255});
+                });
+                it("are weighted by distance from the neighbouring subclasses", () => {
+                    const data = parse('O9.7V', true).data;
+                    expect(data.mass).toEqual(18.25);
+                    expect(data.temperature).toEqual(28660);
+                });
+                it("are interpolated across letter boundaries", () => {
+                    const data = parse('B9.5V', true).data;
+                    expect(data.mass).toEqual(3.15);
+                    expect(data.temperature).toEqual(10810);
+                });
+                it("use the lower subclass if there is no higher one", () => {
+                    expect(parse('M9.5V', true).data).toEqual(parse('M9V', true).data);
+                    expect(parse('DA9.5', true).data).toEqual(parse('DA9', true).data);
+                });
+                it("are interpolated for white dwarf temperatures", () => {
+                    const data = parse('DA4.5', true).data;
+                    expect(data.mass).toEqual(0.55);
+                    expect(data.temperature).toEqual(11340);
+                });
+                it("are interpolated in ranges", () => {
+                    expect(parse('A3-3.5', true).data.mass).toEqual(2.325);
+                });
             });
 
             describe("luminosity classes without their own rows in the data", () => {

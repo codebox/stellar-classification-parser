@@ -50,20 +50,32 @@ const NO_INFO = Object.freeze({}),
         'I' : ['Ia', 'Ib'],
         'Iab' : ['Ia', 'Ib']
     },
-    LUMINOSITY_WITH_MODIFIER_REGEX = /^(II|III|IV|V|VI|VII)[ab]$/;
+    LUMINOSITY_WITH_MODIFIER_REGEX = /^(II|III|IV|V|VI|VII)[ab]$/,
+    SPECTRAL_SEQUENCE = ['O', 'B', 'A', 'F', 'G', 'K', 'M'];
 
-function average(dataObjects) {
-    const result = {};
+function average(dataObjects, weights = dataObjects.map(() => 1)) {
+    const result = {},
+        totalWeight = weights.reduce((a, weight) => a + weight, 0);
 
     Object.keys(dataObjects[0]).forEach(key => {
         if (typeof dataObjects[0][key] === 'object') {
-            result[key] = average(dataObjects.map(dataObject => dataObject[key]));
+            result[key] = average(dataObjects.map(dataObject => dataObject[key]), weights);
         } else {
-            result[key] = dataObjects.reduce((a, dataObject) => a + dataObject[key], 0) / dataObjects.length;
+            result[key] = dataObjects.reduce((a, dataObject, i) => a + dataObject[key] * weights[i], 0) / totalWeight;
         }
     });
 
     return result;
+}
+
+function getNextSubclass(letter, number) {
+    const nextLetter = SPECTRAL_SEQUENCE[SPECTRAL_SEQUENCE.indexOf(letter) + 1];
+
+    if (number === 9 && SPECTRAL_SEQUENCE.includes(letter) && nextLetter) {
+        // eg the subclass after B9 is A0
+        return {letter : nextLetter, number : 0};
+    }
+    return {letter, number : number + 1};
 }
 
 function getLuminosityKeys(luminosity) {
@@ -96,11 +108,30 @@ function lookupLuminosity(letter, number, luminosity) {
     return NO_INFO;
 }
 
-exports.NO_INFO = NO_INFO;
-exports.lookup = (letter, number, luminosity) => {
+function lookupClass(letter, number, luminosity) {
     const dataObjects = getLuminosityKeys(luminosity)
         .map(luminosityKey => lookupLuminosity(letter, number, luminosityKey))
         .filter(data => data !== NO_INFO);
 
     return dataObjects.length ? average(dataObjects) : NO_INFO;
+}
+
+exports.NO_INFO = NO_INFO;
+exports.lookup = (letter, number, luminosity) => {
+    if (number === undefined || Number.isInteger(number)) {
+        return lookupClass(letter, number, luminosity);
+    }
+
+    // data.txt only has whole-number subclasses, so interpolate between the two nearest ones, eg A3.5 is halfway between A3 and A4
+    const lowerNumber = Math.floor(number),
+        fraction = number - lowerNumber,
+        upper = getNextSubclass(letter, lowerNumber),
+        lowerData = lookupClass(letter, lowerNumber, luminosity),
+        upperData = lookupClass(upper.letter, upper.number, luminosity);
+
+    if (lowerData !== NO_INFO && upperData !== NO_INFO) {
+        return average([lowerData, upperData], [1 - fraction, fraction]);
+    }
+    // If only one of the neighbouring subclasses has data then use that
+    return lowerData !== NO_INFO ? lowerData : upperData;
 };
