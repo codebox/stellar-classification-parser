@@ -1008,6 +1008,16 @@ describe("Classifier", function() {
                     }
                 }
             }));
+            it('zero', () => theText("DA0").isParsedToExactly({
+                class : {
+                    text: 'DA0',
+                    value: {
+                        letter: 'D',
+                        dwarfType : 'A',
+                        dwarfTemperature : 0
+                    }
+                }
+            }));
             it('double digit', () => theText("DA10").isParsedToExactly({
                 class : {
                     text: 'DA10',
@@ -1225,6 +1235,25 @@ describe("Classifier", function() {
                     colour: {
                         r: 191,
                         g: 207,
+                        b: 255
+                    }
+                })
+            });
+
+            it("letter, number zero and luminosity", () => {
+                const data = parse('A0V', true).data;
+                expect(data).toEqual({
+                    mass: 2.9,
+                    luminosityRelative: 67.4,
+                    radiusRelative: 2.88,
+                    temperature: 9900,
+                    colourIndexBv: -0.06,
+                    absoluteMagnitude: 0.6,
+                    bolometricCorrection: -0.42,
+                    bolometricMagnitude: 0.18,
+                    colour: {
+                        r: 185,
+                        g: 201,
                         b: 255
                     }
                 })

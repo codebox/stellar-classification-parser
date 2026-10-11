@@ -408,7 +408,7 @@ function populateWhiteDwarfDetails(tree, result) {
         }
 
         const temperature = getTemperature();
-        if (temperature) {
+        if (temperature !== undefined) {
             result.class.value.dwarfTemperature = temperature;
         }
 

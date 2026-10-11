@@ -53,7 +53,7 @@ exports.lookup = (letter, number, luminosity) => {
         letterInfo = lookupTree[letter];
 
     if (letterInfo) {
-        const numberInfo = letterInfo[number || DEFAULT_NUMBER];
+        const numberInfo = letterInfo[number === undefined ? DEFAULT_NUMBER : number];
         if (numberInfo) {
             const isWhiteDwarf = !! letter.match(IS_WHITE_DWARF_REGEX),
                 defaultLuminosity = isWhiteDwarf ? WHITE_DWARF_DEFAULT_LUMINOSITY : NON_WHITE_DWARF_DEFAULT_LUMINOSITY,
