@@ -216,10 +216,6 @@ const fs = require('fs'),
         'Fe' : {
             flagName : 'iron',
             description : 'Iron'
-        },
-        'K'  : {
-            flagName : 'potassium',
-            description : 'Potassium'
         }
     };
 

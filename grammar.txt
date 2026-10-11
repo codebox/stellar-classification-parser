@@ -44,7 +44,7 @@ SUFFIXES                -> SUFFIX SUFFIX_UNCERTAINTIES SUFFIXES | ε
 SUFFIX                  -> ... | comp | e | eq | f | (f) | ((f)) | He wk | m | n | nn | p | s | sh | v | var | w | wk | wl | ( WEAK_SUFFIX ) | ELEMENT_VALUE | INDEX
 WEAK_SUFFIX             -> comp | e | eq | m | n | nn | p | s | sh | v | var | w | wk | wl
 ELEMENT_VALUE           -> ELEMENT | ( ELEMENT )
-ELEMENT                 -> Sr | He | Eu | Si | Hg | Mn | Cr | Fe | K
+ELEMENT                 -> Sr | He | Eu | Si | Hg | Mn | Cr | Fe
 INDEX                   -> INDEX_NAME INDEX_VALUE
 INDEX_NAME              -> Fe | CN | CH | Ba | C2 | Ca
 INDEX_VALUE             -> INDEX_SIGN CLASS_DIGITS | CLASS_DIGITS

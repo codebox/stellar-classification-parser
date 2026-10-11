@@ -865,7 +865,11 @@ describe("Classifier", function() {
                 it("Manganese", () => theText("GMn").isParsedToExactly(resultForElement('Mn', 'manganese', 'Manganese')));
                 it("Chromium", () => theText("GCr").isParsedToExactly(resultForElement('Cr', 'chromium', 'Chromium')));
                 it("Iron", () => theText("GFe").isParsedToExactly(resultForElement('Fe', 'iron', 'Iron')));
-                it("Potassium", () => theText("GK").isParsedToExactly(resultForElement('K', 'potassium', 'Potassium')));
+                it("K is not an element code", () => {
+                    theText("GK").cannotBeParsed();
+                    theText("G5 K").cannotBeParsed();
+                    theText("K0IIIK").cannotBeParsed();
+                });
 
                 it("Element in brackets", () => theText("G(Fe)").isParsedToExactly({
                     class : {
