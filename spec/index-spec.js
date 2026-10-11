@@ -969,6 +969,24 @@ describe("Classifier", function() {
             it("S5*6", () => theText("S5*6").cannotBeParsed());
         });
     });
+    describe('MS and SC stars', () => {
+        it('MS', () => expect(parse('MS3').class).toEqual({text : 'MS3', value : {letter : 'MS', number : 3}}));
+        it('SC with a C/O ratio', () => expect(parse('SC5/9').class).toEqual({
+            text : 'SC5/9',
+            value : {
+                letter : 'SC',
+                number : 5,
+                abundance : {
+                    CORatio : 9
+                }
+            }
+        }));
+    });
+    describe('S-Type stars with luminosity and peculiarities', () => {
+        it('luminosity', () => expect(parse('S4/2 III').luminosity.text).toEqual('III'));
+        it('peculiarities', () => expect(parse('S4,2e').peculiarities.text).toEqual('e'));
+        it('use giant data by default', () => expect(parse('S4', true).data).toEqual(parse('S4III', true).data));
+    });
     describe('White Dwarfs', () => {
         it('basic type only', () => theText("D").isParsedToExactly({
             class : {
@@ -1190,11 +1208,52 @@ describe("Classifier", function() {
         it('C-J',  () => theText("C-J").isParsedToExactly(carbonStarOfType('J', 'Carbon star with strong carbon-13 features')));
         it('C-H',  () => theText("C-H").isParsedToExactly(carbonStarOfType('H', 'CH star (metal-poor carbon star)')));
         it('C-Hd', () => theText("C-Hd").isParsedToExactly(carbonStarOfType('Hd', 'Hydrogen-deficient carbon star')));
-        it('have no data', () => expect(parse('C-R', true).data).toEqual({}));
+        it('with a number', () => expect(parse('C-N5').class).toEqual({
+            text : 'C-N5',
+            value : {
+                letter : 'C',
+                number : 5,
+                subtypes : [{code : 'N', description : 'Cooler carbon star (formerly class N)'}]
+            }
+        }));
+        it('with a fractional number', () => expect(parse('C-J4.5').class.value.number).toEqual(4.5));
+        it('in the older notation with a C2 band strength', () => expect(parse('C5,4').class).toEqual({
+            text : 'C5,4',
+            value : {
+                letter : 'C',
+                number : 5,
+                abundance : {
+                    C2Strength : 4
+                }
+            }
+        }));
+        it('in the older notation without a C2 band strength', () => expect(parse('C5').class.value).toEqual({letter : 'C', number : 5}));
+        it('with a luminosity', () => expect(parse('C-R III').luminosity.text).toEqual('III'));
+        it('with peculiarities', () => expect(parse('C-Rvar').peculiarities.text).toEqual('var'));
+        it('with a C2 index', () => {
+            const result = parse('C-N5 C2 6');
+            expect(result.class.text).toEqual('C-N5');
+            expect(result.peculiarities.text).toEqual('C2 6');
+            expect(result.peculiarities.flags.indices).toEqual({dicarbon : 6});
+        });
+        it('C-R and C-N use the R and N data, as giants by default', () => {
+            expect(parse('C-R5', true).data).toEqual(parse('R5III', true).data);
+            expect(parse('C-N5', true).data).toEqual(parse('N5III', true).data);
+            expect(parse('C-N5 V', true).data).toEqual(parse('N5V', true).data);
+        });
+        it('the older notation uses the C data', () => expect(parse('C5,4', true).data).toEqual(parse('C5', true).data));
+        it('C-J, C-H and C-Hd have no data', () => {
+            expect(parse('C-J4', true).data).toEqual({});
+            expect(parse('C-H3', true).data).toEqual({});
+            expect(parse('C-Hd', true).data).toEqual({});
+        });
+        it('R and N are valid classes', () => {
+            expect(parse('R5').class.value).toEqual({letter : 'R', number : 5});
+            expect(parse('N3').class.value).toEqual({letter : 'N', number : 3});
+        });
 
         it('C-X',    () => theText("C-X").cannotBeParsed());
-        it('C-RI',   () => theText("C-RI").cannotBeParsed());
-        it('C-Rvar', () => theText("C-Rvar").cannotBeParsed());
+        it('C-R5,4', () => theText("C-R5,4").cannotBeParsed());
     });
 
     describe("additional data", function() {

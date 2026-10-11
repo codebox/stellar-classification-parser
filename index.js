@@ -392,7 +392,7 @@ function populateSTypeClassDetails(tree, result) {
         result.class = {
             text : tree.findOnly('S_TYPE').collectText(),
             value : {
-                letter : 'S'
+                letter : tree.findOnly('S_TYPE_LETTER').get()[0]
             }
         };
 
@@ -487,19 +487,36 @@ function populateCarbonStarDetails(tree, result) {
     }
 
     if (isCarbonStar()) {
-        const type = tree.findOnly('CARBON_STAR').collectText(),
-            subtype = type.replace('C-', '');
+        const carbonStar = tree.findOnly('CARBON_STAR'),
+            carbonType = carbonStar.findOptional('CARBON_TYPE'),
+            value = {
+                letter : 'C'
+            };
 
         result.class = {
-            text : type,
-            value : {
-                letter : 'C',
-                subtypes : [{
-                    code : subtype,
-                    description : CARBON_STAR_SUBTYPES[subtype]
-                }]
-            }
+            text : carbonStar.collectText(),
+            value
         };
+
+        carbonStar.onOptionalValue('CLASS_NUMBER', classNumber => value.number = Number(classNumber.collectText()));
+
+        if (!carbonType.empty) {
+            // Modern notation, eg C-N5
+            const subtype = carbonType.get()[0].replace('C-', '');
+            value.subtypes = [{
+                code : subtype,
+                description : CARBON_STAR_SUBTYPES[subtype]
+            }];
+
+        } else {
+            // Older notation, eg C5,4 where the second number is the strength of the C2 bands
+            const c2Strength = carbonStar.findOptional('CARBON_C2_STRENGTH').findOptional('NUMBER');
+            if (!c2Strength.empty) {
+                value.abundance = {
+                    C2Strength : Number(c2Strength.get()[0])
+                };
+            }
+        }
     }
 }
 
@@ -580,10 +597,14 @@ function populatePeculiarities(tree, result) {
                 index = suffixValue.findOptional('INDEX');
 
             if (!index.empty) {
+                const name = index.findOnly('INDEX_NAME').get()[0],
+                    valueText = index.findOnly('INDEX_VALUE').collectText();
                 suffixes.push({
-                    index : index.findOnly('INDEX_NAME').get()[0],
-                    text : index.collectText(),
-                    value : Number(index.findOnly('INDEX_VALUE').collectText()),
+                    index : name,
+                    // Separate names ending in a digit from the value, eg 'C2 6' rather than 'C26'
+                    text : /[0-9]$/.test(name) ? `${name} ${valueText}` : name + valueText,
+                    valueText,
+                    value : Number(valueText),
                     uncertainty : uncertainties.collectText()
                 });
             } else if (elementValue.empty) {
@@ -629,7 +650,7 @@ function populatePeculiarities(tree, result) {
             (peculiarities.flags.indices || (peculiarities.flags.indices = {}))[indexDetails.flagName] = suffix.value;
             details = {
                 text : suffix.text,
-                description : `Strength index of ${indexDetails.description} features: ${suffix.text.substr(suffix.index.length)}`,
+                description : `Strength index of ${indexDetails.description} features: ${suffix.valueText}`,
                 value : suffix.value
             };
 
@@ -721,7 +742,13 @@ function getData(result) {
             });
 
         } else if (value.letter === 'C') {
-            // data.txt has no data for the carbon star sub-types
+            // C-R and C-N correspond to the older R and N classes. data.txt has no data for the other carbon star sub-types.
+            const subtype = value.subtypes && value.subtypes[0].code;
+            if (!subtype) {
+                classes.push(value);
+            } else if (subtype === 'R' || subtype === 'N') {
+                classes.push({letter : subtype, number : value.number});
+            }
 
         } else {
             classes.push(value);

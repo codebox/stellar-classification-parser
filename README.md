@@ -30,7 +30,7 @@ If the value can't be parsed then `parse` throws a `ParseError`. The error's `po
         }
     }
 
-The `parse` method has an optional second parameter which, if set to `true`, adds a `data` object containing physical attributes of the star, such as its mass, temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, and if there is no numeric sub-division then `5` is assumed. Fractional sub-divisions (e.g. `B9.5`) are interpolated between the neighbouring sub-divisions. Ranges are averaged over every class between the two ends (so `B0-B9` includes `B1` to `B8`, and `II-IV` includes `III`), and choices and combinations are averaged over the classes given. Mass, luminosity, radius and temperature are averaged on a log scale, since they vary by orders of magnitude between classes. If no data is available the `data` object is empty.
+The `parse` method has an optional second parameter which, if set to `true`, adds a `data` object containing physical attributes of the star, such as its mass, temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, except for carbon and S-type stars where a giant (`III`) is assumed, and if there is no numeric sub-division then `5` is assumed. Fractional sub-divisions (e.g. `B9.5`) are interpolated between the neighbouring sub-divisions. Ranges are averaged over every class between the two ends (so `B0-B9` includes `B1` to `B8`, and `II-IV` includes `III`), and choices and combinations are averaged over the classes given. Mass, luminosity, radius and temperature are averaged on a log scale, since they vary by orders of magnitude between classes. If no data is available the `data` object is empty.
 
 ## The result
 A classification for a single star produces an object with up to three parts, `class`, `luminosity` and `peculiarities`, plus `data` if requested. For example `B2IVe:` gives:
@@ -65,8 +65,8 @@ Each class has a `letter` and, if one was given, a `number`. Some types of star 
 
 * Wolf-Rayet stars may have `subtypes` for early or late types and qualifiers, e.g. `WN7h` gives letter `WN` and code `h`
 * White dwarfs (`D`) have `subtypes`, a list of `{code, description}`, e.g. `DAB` gives codes `A` and `B`. The `number` is the temperature index
-* Carbon stars have letter `C` and a single subtype, e.g. `C-N` gives code `N`
-* S-type stars may have an `abundance` object containing one of `ZrOTiORatio`, `CORatio` or `ZrOStrength`
+* Carbon stars have letter `C`. In the modern notation they have a single subtype, e.g. `C-N5` gives code `N`; in the older notation `C5,4` the second number is reported as `abundance.C2Strength`
+* S-type stars (letter `S`, `MS` or `SC`) may have an `abundance` object containing one of `ZrOTiORatio`, `CORatio` or `ZrOStrength`
 
 If the class was marked as uncertain (e.g. `G5:`) then `uncertain` is `true`.
 
@@ -103,9 +103,9 @@ Among other things, the parser understands:
 * Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`, and element codes such as `Sr` or `HgMn`. Codes in brackets, such as `(n)` or `(e)`, indicate a weak feature
 * Strength indices for iron, CN, CH, barium, C2 and calcium e.g. `K1.5IIIFe-0.5` or `G8III CN+1 Ba2`
 * Uncertainty markers `:` or `?` after the class, luminosity, or any peculiarity code e.g. `G5:`, `G0V?` or `B2IVe:`
-* Codes for S-type stars including abundance indications for `ZrO/TiO`, `C/O` and `ZrO`
+* Codes for S-type stars including abundance indications for `ZrO/TiO`, `C/O` and `ZrO`, and the intermediate `MS` and `SC` types e.g. `S4/2 III` or `SC5/9`
 * White dwarf codes `DA`, `DB`, `DO`, `DQ`, `DZ`, `DC` and `DX` with or without numeric suffixes, as well as peculiarity codes `P`, `E`, `H`, `V`, `PEC`
-* Carbon star types `C-R`, `C-N`, `C-J`, `C-H`, `C-Hd`
+* Carbon star types `C-R`, `C-N`, `C-J`, `C-H`, `C-Hd` with optional numbers e.g. `C-N5`, the older `C5,4` notation, and the historical `R` and `N` classes
 
 Spaces are ignored, so `K0 III` is treated the same as `K0III`, and `B8 III p HgMn` the same as `B8IIIpHgMn`.
 

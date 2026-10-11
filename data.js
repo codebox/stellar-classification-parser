@@ -141,13 +141,17 @@ function lookupLuminosity(letter, number, luminosity) {
         IS_WHITE_DWARF_REGEX = /^D.$/,
         NON_WHITE_DWARF_DEFAULT_LUMINOSITY = 'V',
         WHITE_DWARF_DEFAULT_LUMINOSITY = '',
+        // Carbon and S-type stars are almost all giants
+        GIANT_DEFAULT_LUMINOSITY = 'III',
+        GIANT_LETTERS = ['C', 'R', 'N', 'S', 'MS', 'SC'],
         letterInfo = lookupTree[letter];
 
     if (letterInfo) {
         const numberInfo = letterInfo[number === undefined ? DEFAULT_NUMBER : number];
         if (numberInfo) {
             const isWhiteDwarf = !! letter.match(IS_WHITE_DWARF_REGEX),
-                defaultLuminosity = isWhiteDwarf ? WHITE_DWARF_DEFAULT_LUMINOSITY : NON_WHITE_DWARF_DEFAULT_LUMINOSITY,
+                defaultLuminosity = isWhiteDwarf ? WHITE_DWARF_DEFAULT_LUMINOSITY :
+                    GIANT_LETTERS.includes(letter) ? GIANT_DEFAULT_LUMINOSITY : NON_WHITE_DWARF_DEFAULT_LUMINOSITY,
                 data = numberInfo[luminosity || defaultLuminosity];
             if (data) {
                 return data;
