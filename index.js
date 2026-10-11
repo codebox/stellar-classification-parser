@@ -15,6 +15,7 @@ const fs = require('fs'),
     parser = require('top-down-parser').buildParser(grammarText, START_SYMBOL, EPSILON),
     LUMINOSITY_DESCRIPTIONS = {
         '0' : 'Hypergiant',
+        'Ia0' : 'Hypergiant',
         'Ia+' : 'Hypergiant',
         'Ia' : 'Luminous Supergiant',
         'Iab' : 'Intermediate size Luminous Supergiant',
