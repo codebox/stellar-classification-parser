@@ -498,72 +498,73 @@ function populatePeculiarities(tree, result) {
         while (!suffixesTree.empty) {
             const [suffix, uncertainties, remainingSuffixes] = suffixesTree.children(),
                 suffixValue = suffix.findOnly('SUFFIX'),
-                elements = suffixValue.find('ELEMENT');
+                elementValue = suffixValue.findOptional('ELEMENT_VALUE');
 
-            suffixes.push({
-                isElement : elements.length > 0,
-                text : elements.length ? elements[0].get()[0] : suffixValue.get().join(' '),
-                uncertainty : uncertainties.collectText()
-            });
+            if (elementValue.empty) {
+                suffixes.push({
+                    text : suffixValue.get().join(' '),
+                    uncertainty : uncertainties.collectText()
+                });
+            } else {
+                suffixes.push({
+                    element : elementValue.findOnly('ELEMENT').get()[0],
+                    // An element in brackets, eg (Sr), indicates that the lines are only mildly enhanced
+                    weak : elementValue.get().length > 1,
+                    uncertainty : uncertainties.collectText()
+                });
+            }
             suffixesTree = remainingSuffixes.findOptional('SUFFIXES');
         }
 
         return suffixes;
     }
 
-    function buildDetails(suffix, description) {
-        const details = {
-            text : suffix.text,
-            description
-        };
+    const suffixes = getSuffixes();
+    if (!suffixes.length) {
+        return;
+    }
+
+    const peculiarities = result.peculiarities = {
+        text : '',
+        flags : {},
+        details : []
+    };
+
+    peculiarities.text = suffixes.map(suffix => {
+        let details;
+
+        if (suffix.element) {
+            const elementDetails = ELEMENTS[suffix.element];
+            assert(elementDetails, suffix.element);
+
+            (peculiarities.flags.elements || (peculiarities.flags.elements = {}))[elementDetails.flagName] = true;
+            details = {
+                text : suffix.element,
+                description : suffix.weak ? `Mildly enhanced spectral lines of ${elementDetails.description}` : `Abnormally strong spectral lines of ${elementDetails.description}`
+            };
+            if (suffix.weak) {
+                details.weak = true;
+            }
+
+        } else {
+            const suffixDetails = SUFFIXES.global[suffix.text];
+            assert(suffixDetails, suffix.text);
+
+            peculiarities.flags[suffixDetails.flagName] = true;
+            details = {
+                text : suffix.text,
+                description : suffixDetails.description
+            };
+        }
+
         if (suffix.uncertainty) {
             details.uncertain = true;
         }
-        return details;
-    }
+        peculiarities.details.push(details);
 
-    const allSuffixes = getSuffixes(),
-        suffixes = allSuffixes.filter(s => !s.isElement),
-        elements = allSuffixes.filter(s => s.isElement),
-        getText = s => s.text + s.uncertainty;
-
-    if (suffixes.length) {
-        result.peculiarities = {
-            text : suffixes.map(getText).join(' '),
-            flags : {},
-            details : []
-        };
-
-        suffixes.forEach(suffix => {
-            const details = SUFFIXES.global[suffix.text];
-            assert(details, suffix.text);
-
-            result.peculiarities.flags[details.flagName] = true;
-            result.peculiarities.details.push(buildDetails(suffix, details.description));
-        });
-    }
-
-    if (elements.length) {
-        if (!result.peculiarities) {
-            result.peculiarities = {
-                text : '',
-                flags : {},
-                details : []
-            };
-        } else {
-            result.peculiarities.text += ' ';
-        }
-
-        result.peculiarities.text += elements.map(getText).join(' ');
-        const flags = result.peculiarities.flags.elements = {};
-
-        elements.forEach(element => {
-            const details = ELEMENTS[element.text];
-
-            flags[details.flagName] = true;
-            result.peculiarities.details.push(buildDetails(element, `Abnormally strong spectral lines of ${details.description}`));
-        });
-    }
+        const text = suffix.weak ? `(${details.text})` : details.text;
+        return text + suffix.uncertainty;
+    }).join(' ');
 }
 
 function transformStar(tree) {

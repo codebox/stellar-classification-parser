@@ -818,7 +818,7 @@ describe("Classifier", function() {
                         }
                     },
                     peculiarities : {
-                        text : 'Fe',
+                        text : '(Fe)',
                         flags : {
                             elements : {
                                 iron: true
@@ -826,11 +826,17 @@ describe("Classifier", function() {
                         },
                         details : [{
                             text : 'Fe',
-                            description : 'Abnormally strong spectral lines of Iron'
+                            description : 'Mildly enhanced spectral lines of Iron',
+                            weak : true
                         }]
                     }
                 }));
             });
+        });
+        it("text is normalised with a space between each peculiarity", () => {
+            expect(parse('GpHe').peculiarities.text).toEqual('p He');
+            expect(parse('G p He').peculiarities.text).toEqual('p He');
+            expect(parse('G5Vnn(Sr):').peculiarities.text).toEqual('nn (Sr):');
         });
         it("multiple peculiarities", () => theText("G He wk pvarHe (Sr)...").isParsedToExactly({
             class : {
@@ -840,7 +846,7 @@ describe("Classifier", function() {
                 }
             },
             peculiarities : {
-                text : "He wk p var ... He Sr",
+                text : "He wk p var He (Sr) ...",
                 flags : {
                     weakHeliumLines : true,
                     unspecifiedPeculiarity : true,
@@ -862,14 +868,15 @@ describe("Classifier", function() {
                         text : "var",
                         description : "Variable spectral feature"
                     },{
-                        text : "...",
-                        description : "Undescribed peculiarities"
-                    },{
                         text : "He",
                         description : "Abnormally strong spectral lines of Helium"
                     },{
                         text : "Sr",
-                        description : "Abnormally strong spectral lines of Strontium"
+                        description : "Mildly enhanced spectral lines of Strontium",
+                        weak : true
+                    },{
+                        text : "...",
+                        description : "Undescribed peculiarities"
                     }
                 ]
             }
