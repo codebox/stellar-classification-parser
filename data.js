@@ -48,7 +48,7 @@ exports.NO_INFO = NO_INFO;
 exports.lookup = (letter, number, luminosity) => {
     const DEFAULT_NUMBER = '5',
         IS_WHITE_DWARF_REGEX = /^D.$/,
-        NON_WHITE_DWARF_DEFAULT_LUMINOSITY = 'II',
+        NON_WHITE_DWARF_DEFAULT_LUMINOSITY = 'V',
         WHITE_DWARF_DEFAULT_LUMINOSITY = '',
         letterInfo = lookupTree[letter];
 

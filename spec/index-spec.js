@@ -1186,17 +1186,17 @@ describe("Classifier", function() {
             it("letter only", () => {
                 const data = parse('A', true).data;
                 expect(data).toEqual({
-                    mass: 7.2,
-                    luminosityRelative: 1290,
-                    radiusRelative: 16.5,
+                    mass: 1.9,
+                    luminosityRelative: 17,
+                    radiusRelative: 1.89,
                     temperature: 8650,
                     colourIndexBv: 0.05,
-                    absoluteMagnitude: -2.8,
+                    absoluteMagnitude: 1.9,
                     bolometricCorrection: -0.23,
-                    bolometricMagnitude: -3.03,
+                    bolometricMagnitude: 1.67,
                     colour: {
-                        r: 194,
-                        g: 210,
+                        r: 202,
+                        g: 215,
                         b: 255
                     }
                 })
@@ -1205,16 +1205,16 @@ describe("Classifier", function() {
             it("letter and number only", () => {
                 const data = parse('A3', true).data;
                 expect(data).toEqual({
-                    mass: 8.1,
-                    luminosityRelative: 1660,
-                    radiusRelative: 16.7,
+                    mass: 2.4,
+                    luminosityRelative: 28.9,
+                    radiusRelative: 2.2,
                     temperature: 9150,
                     colourIndexBv: -0.04,
-                    absoluteMagnitude: -3,
+                    absoluteMagnitude: 1.4,
                     bolometricCorrection: -0.3,
-                    bolometricMagnitude: -3.3,
+                    bolometricMagnitude: 1.1,
                     colour: {
-                        r: 190,
+                        r: 191,
                         g: 207,
                         b: 255
                     }
@@ -1262,16 +1262,16 @@ describe("Classifier", function() {
             it("letter and number range", () => {
                 const data = parse('A3-A7', true).data;
                 expect(data).toEqual({
-                    mass: 7.65,
-                    luminosityRelative: 1385,
-                    radiusRelative: 16.95,
+                    mass: 2.1,
+                    luminosityRelative: 20.55,
+                    radiusRelative: 2.005,
                     temperature: 8650,
                     colourIndexBv: 0.05,
-                    absoluteMagnitude: -2.85,
+                    absoluteMagnitude: 1.8,
                     bolometricCorrection: -0.235,
-                    bolometricMagnitude: -3.085,
+                    bolometricMagnitude: 1.565,
                     colour: {
-                        r: 194,
+                        r: 196,
                         g: 210,
                         b: 255
                     }
@@ -1281,17 +1281,17 @@ describe("Classifier", function() {
             it("letter and number choice", () => {
                 const data = parse('A3/A9', true).data;
                 expect(data).toEqual({
-                    mass: 7.6,
-                    luminosityRelative: 1315,
-                    radiusRelative: 17.5,
+                    mass: 2.05,
+                    luminosityRelative: 18.88,
+                    radiusRelative: 1.975,
                     temperature: 8400,
                     colourIndexBv: 0.1,
-                    absoluteMagnitude: -2.8,
+                    absoluteMagnitude: 1.95,
                     bolometricCorrection: -0.21,
-                    bolometricMagnitude: -3.01,
+                    bolometricMagnitude: 1.74,
                     colour: {
-                        r: 196,
-                        g: 212,
+                        r: 205,
+                        g: 216,
                         b: 255
                     }
                 })
@@ -1300,17 +1300,17 @@ describe("Classifier", function() {
             it("letter and number combination", () => {
                 const data = parse('A3+A9', true).data;
                 expect(data).toEqual({
-                    mass: 7.6,
-                    luminosityRelative: 1315,
-                    radiusRelative: 17.5,
+                    mass: 2.05,
+                    luminosityRelative: 18.88,
+                    radiusRelative: 1.975,
                     temperature: 8400,
                     colourIndexBv: 0.1,
-                    absoluteMagnitude: -2.8,
+                    absoluteMagnitude: 1.95,
                     bolometricCorrection: -0.21,
-                    bolometricMagnitude: -3.01,
+                    bolometricMagnitude: 1.74,
                     colour: {
-                        r: 196,
-                        g: 212,
+                        r: 205,
+                        g: 216,
                         b: 255
                     }
                 })
@@ -1357,16 +1357,16 @@ describe("Classifier", function() {
             it("should handle one component with no data", () => {
                 const data = parse('A3/3.5', true).data;
                 expect(data).toEqual({
-                    mass: 8.1,
-                    luminosityRelative: 1660,
-                    radiusRelative: 16.7,
+                    mass: 2.4,
+                    luminosityRelative: 28.9,
+                    radiusRelative: 2.2,
                     temperature: 9150,
                     colourIndexBv: -0.04,
-                    absoluteMagnitude: -3,
+                    absoluteMagnitude: 1.4,
                     bolometricCorrection: -0.3,
-                    bolometricMagnitude: -3.3,
+                    bolometricMagnitude: 1.1,
                     colour: {
-                        r: 190,
+                        r: 191,
                         g: 207,
                         b: 255
                     }
