@@ -45,3 +45,5 @@ Among other things, the parser understands:
 * Codes for S-type stars including abundance indications for `ZrO/TiO`, `C/O` and `ZrO`
 * White dwarf codes `DA`, `DB`, `DO`, `DQ`, `DZ`, `DC` and `DX` with or without numeric suffixes, as well as peculiarity codes `P`, `E`, `H`, `V`, `PEC`
 * Carbon star types `C-R`, `C-N`, `C-J`, `C-H`, `C-Hd`
+
+Spaces are ignored, so `K0 III` is treated the same as `K0III`, and `B8 III p HgMn` the same as `B8IIIpHgMn`.

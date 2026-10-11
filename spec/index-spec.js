@@ -1516,6 +1516,17 @@ describe("Classifier", function() {
         });
     });
 
+    describe("spaces", function() {
+        it("are ignored between parts of the classification", () => {
+            expect(parse('K0 III')).toEqual(parse('K0III'));
+            expect(parse('B8 III p HgMn')).toEqual(parse('B8IIIpHgMn'));
+            expect(parse('G5 II / III')).toEqual(parse('G5II/III'));
+        });
+        it("are ignored at the start and end", () => {
+            expect(parse(' G2V ')).toEqual(parse('G2V'));
+        });
+    });
+
     describe("invalid input", function() {
         it("non-string values cannot be parsed", () => {
             [undefined, null, 5, {}, [], true].forEach(value => {
