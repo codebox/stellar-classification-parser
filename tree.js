@@ -73,7 +73,7 @@ function tree(root, epsilon = 'ε') {
         findOnly(name) {
             const matches = search(root, name);
             if (matches.length === 1){
-                return tree(matches[0]);
+                return tree(matches[0], epsilon);
             }
             throw new Error(`Expected single match for findOnly(${name}) but instead found ${matches.length}, matches were ${JSON.stringify(matches)}`);
         },
@@ -93,14 +93,14 @@ function tree(root, epsilon = 'ε') {
 
         },
 
-        children() { //TODO tests
+        children() {
             if (Array.isArray(root)) {
-                return root.map(tree);
+                return root.map(child => tree(child, epsilon));
             }
             return [];
         },
 
-        child(index) { //TODO tests
+        child(index) {
             const children = this.children();
             if (index >= children.length) {
                 throw new Error(`Unable to return child with index ${index}, the children array only contains ${children.length} items. Array is ${JSON.stringify(children)}`);

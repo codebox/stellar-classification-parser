@@ -193,6 +193,29 @@ describe("Classifier", function() {
                 }
             });
         });
+        it("letters with fractional number ranges are handled correctly", () => {
+            theText("B0.5-1.5").isParsedToExactly({
+                class : {
+                    text : 'B0.5-1.5',
+                    range : {
+                        from : {
+                            letter : 'B',
+                            number : 0.5
+                        },
+                        to : {
+                            letter : 'B',
+                            number : 1.5
+                        }
+                    }
+                }
+            });
+        });
+
+        it("A5- is invalid", () => theText("A5-").cannotBeParsed());
+        it("A5/ is invalid", () => theText("A5/").cannotBeParsed());
+        it("A- is invalid", () => theText("A-").cannotBeParsed());
+        it("A/ is invalid", () => theText("A/").cannotBeParsed());
+        it("A5-V is invalid", () => theText("A5-V").cannotBeParsed());
     });
 
     describe("handles single luminosities correctly", function() {

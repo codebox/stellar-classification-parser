@@ -88,6 +88,27 @@ describe("Tree", function() {
             expect(tree('a').collectText()).toEqual('a');
             expect(tree({a:'1', b:[2,{c:'3'}], d:{e:[4,5]}}).collectText()).toEqual('12345');
         });
+        it("ignores epsilon values", () => {
+            expect(tree({a:'1', b:[EPSILON, {c:EPSILON}]}, EPSILON).collectText()).toEqual('1');
+        });
+    });
+
+    describe("children and child", () => {
+        it("children ignore epsilon values", () => {
+            const children = tree(['a', {X:EPSILON}, {Y:'b'}], EPSILON).children();
+            expect(children.map(c => c.collectText())).toEqual(['a', '', 'b']);
+        });
+        it("child ignores epsilon values", () => {
+            const t = tree(['a', {X:EPSILON}, {Y:[EPSILON]}], EPSILON);
+            expect(t.child(1).collectText()).toEqual('');
+            expect(t.child(2).collectText()).toEqual('');
+        });
+        it("child throws error if index is out of range", () => {
+            expect(() => tree(['a']).child(1)).toThrowError(Error);
+        });
+        it("findOnly result ignores epsilon values", () => {
+            expect(tree({X:['a', EPSILON]}, EPSILON).findOnly('X').collectText()).toEqual('a');
+        });
     });
 
     describe("on... functions", () => {
