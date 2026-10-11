@@ -1512,7 +1512,7 @@ describe("Classifier", function() {
             });
 
             it("should handle one component with no data", () => {
-                const data = parse('A3V/VII', true).data;
+                const data = parse('A3/L2V', true).data;
                 expect(data).toEqual({
                     mass: 2.4,
                     luminosityRelative: 28.9,
@@ -1531,7 +1531,7 @@ describe("Classifier", function() {
             });
 
             it("should handle all components with no data", () => {
-                const data = parse('A3VII', true).data;
+                const data = parse('L2V', true).data;
                 expect(data).toEqual({})
             });
 
@@ -1636,7 +1636,14 @@ describe("Classifier", function() {
                 it("I is counted once in a luminosity range", () => {
                     expect(parse('G5I-III', true).data.mass).toEqual(2.962);
                 });
-                it("VII has no data", () => expect(parse('G5VII', true).data).toEqual({}));
+                it("VII uses the DA white dwarf data for the same temperature", () => {
+                    // A0V is 9900K, which is a temperature index of 50400/9900 = 5.09, so is close to DA5
+                    const data = parse('A0VII', true).data;
+                    expect(data.temperature).toEqual(9914);
+                    expect(data.mass).toEqual(0.49);
+                    expect(parse('A0VIIa', true).data).toEqual(data);
+                });
+                it("VII has no data for classes cooler than the white dwarf data", () => expect(parse('K5VII', true).data).toEqual({}));
             });
 
             describe("white dwarfs", () => {

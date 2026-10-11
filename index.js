@@ -814,6 +814,21 @@ function roundData(data, round = n => Number(n.toPrecision(4))) {
     return result;
 }
 
+// Luminosity class VII is an old notation for a white dwarf. White dwarf data is keyed by temperature index (50400/T),
+// so use the DA white dwarf with the same temperature as the class.
+function lookupWhiteDwarfData(clazz) {
+    const MAX_TEMPERATURE_INDEX = 10,
+        classData = dataLookup(clazz.letter, clazz.number, 'V');
+
+    if (classData !== NO_INFO) {
+        const temperatureIndex = 50400 / classData.temperature;
+        if (temperatureIndex <= MAX_TEMPERATURE_INDEX) {
+            return dataLookup('DA', temperatureIndex, '');
+        }
+    }
+    return NO_INFO;
+}
+
 function getData(result) {
     const classes = [],
         luminosities = [];
@@ -885,7 +900,7 @@ function getData(result) {
 
     classes.forEach(clazz => {
         luminosities.forEach(luminosity => {
-            const dataResult = dataLookup(clazz.letter, clazz.number, luminosity);
+            const dataResult = /^VII/.test(luminosity) ? lookupWhiteDwarfData(clazz) : dataLookup(clazz.letter, clazz.number, luminosity);
             if (dataResult !== NO_INFO) {
                 dataObjects.push(dataResult);
             }
