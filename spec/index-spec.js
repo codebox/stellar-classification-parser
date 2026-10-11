@@ -1278,17 +1278,17 @@ describe("Classifier", function() {
             it("letter and number range", () => {
                 const data = parse('A3-A7', true).data;
                 expect(data).toEqual({
-                    mass: 2.1,
-                    luminosityRelative: 20.55,
-                    radiusRelative: 2.005,
-                    temperature: 8650,
-                    colourIndexBv: 0.05,
-                    absoluteMagnitude: 1.8,
-                    bolometricCorrection: -0.235,
-                    bolometricMagnitude: 1.565,
+                    mass: 1.988,
+                    luminosityRelative: 18.38,
+                    radiusRelative: 1.971,
+                    temperature: 8643,
+                    colourIndexBv: 0.048,
+                    absoluteMagnitude: 1.82,
+                    bolometricCorrection: -0.232,
+                    bolometricMagnitude: 1.588,
                     colour: {
-                        r: 196,
-                        g: 210,
+                        r: 198,
+                        g: 212,
                         b: 255
                     }
                 })
@@ -1297,10 +1297,10 @@ describe("Classifier", function() {
             it("letter and number choice", () => {
                 const data = parse('A3/A9', true).data;
                 expect(data).toEqual({
-                    mass: 2.05,
-                    luminosityRelative: 18.88,
-                    radiusRelative: 1.975,
-                    temperature: 8400,
+                    mass: 2.02,
+                    luminosityRelative: 15.99,
+                    radiusRelative: 1.962,
+                    temperature: 8366,
                     colourIndexBv: 0.1,
                     absoluteMagnitude: 1.95,
                     bolometricCorrection: -0.21,
@@ -1316,10 +1316,10 @@ describe("Classifier", function() {
             it("letter and number combination", () => {
                 const data = parse('A3+A9', true).data;
                 expect(data).toEqual({
-                    mass: 2.05,
-                    luminosityRelative: 18.88,
-                    radiusRelative: 1.975,
-                    temperature: 8400,
+                    mass: 2.02,
+                    luminosityRelative: 15.99,
+                    radiusRelative: 1.962,
+                    temperature: 8366,
                     colourIndexBv: 0.1,
                     absoluteMagnitude: 1.95,
                     bolometricCorrection: -0.21,
@@ -1335,17 +1335,17 @@ describe("Classifier", function() {
             it("luminosity range", () => {
                 const data = parse('A3II-IV', true).data;
                 expect(data).toEqual({
-                    mass: 6.2,
-                    luminosityRelative: 850.9,
-                    radiusRelative: 9.675,
+                    mass: 5.999,
+                    luminosityRelative: 182,
+                    radiusRelative: 5.534,
                     temperature: 9150,
                     colourIndexBv: -0.04,
-                    absoluteMagnitude: -1,
+                    absoluteMagnitude: -0.6,
                     bolometricCorrection: -0.3,
-                    bolometricMagnitude: -1.3,
+                    bolometricMagnitude: -0.9,
                     colour: {
                         r: 190,
-                        g: 206,
+                        g: 205,
                         b: 255
                     }
                 })
@@ -1354,9 +1354,9 @@ describe("Classifier", function() {
             it("luminosity choice", () => {
                 const data = parse('A3II/III', true).data;
                 expect(data).toEqual({
-                    mass: 7.15,
-                    luminosityRelative: 873.5,
-                    radiusRelative: 10.27,
+                    mass: 7.087,
+                    luminosityRelative: 380.2,
+                    radiusRelative: 7.998,
                     temperature: 9150,
                     colourIndexBv: -0.04,
                     absoluteMagnitude: -1.4,
@@ -1394,22 +1394,47 @@ describe("Classifier", function() {
                 expect(data).toEqual({})
             });
 
+            describe("averaging", () => {
+                it("uses a log scale for mass, luminosity, radius and temperature", () => {
+                    // The geometric mean of B0V and B9V, rather than the arithmetic mean (which would be about 18,000)
+                    expect(parse('B0/B9V', true).data.luminosityRelative).toEqual(2076);
+                });
+                it("uses a linear scale for magnitudes and colour", () => {
+                    const data = parse('B0/B9V', true).data;
+                    expect(data.absoluteMagnitude).toEqual(-1.7);
+                    expect(data.colour).toEqual({r: 169, g: 188, b: 255});
+                });
+                it("includes every subclass in a range", () => {
+                    expect(parse('B0-B9V', true).data.luminosityRelative).toEqual(1896);
+                });
+                it("includes subclasses across letter boundaries in a range", () => {
+                    // Geometric mean of B9V, A0V and A1V
+                    expect(parse('B9-A1V', true).data.luminosityRelative).toEqual(73.35);
+                });
+                it("treats a reversed range the same as the forward range", () => {
+                    expect(parse('A7-A3', true).data).toEqual(parse('A3-A7', true).data);
+                });
+                it("includes every luminosity class in a luminosity range", () => {
+                    expect(parse('A3II-IV', true).data).not.toEqual(parse('A3II/IV', true).data);
+                });
+            });
+
             describe("fractional subclasses", () => {
                 it("are interpolated between the neighbouring subclasses", () => {
                     const data = parse('A3.5', true).data;
-                    expect(data.mass).toEqual(2.25);
-                    expect(data.temperature).toEqual(9025);
+                    expect(data.mass).toEqual(2.245);
+                    expect(data.temperature).toEqual(9024);
                     expect(data.colour).toEqual({r: 194, g: 209, b: 255});
                 });
                 it("are weighted by distance from the neighbouring subclasses", () => {
                     const data = parse('O9.7V', true).data;
-                    expect(data.mass).toEqual(18.25);
-                    expect(data.temperature).toEqual(28660);
+                    expect(data.mass).toEqual(18.22);
+                    expect(data.temperature).toEqual(28640);
                 });
                 it("are interpolated across letter boundaries", () => {
                     const data = parse('B9.5V', true).data;
-                    expect(data.mass).toEqual(3.15);
-                    expect(data.temperature).toEqual(10810);
+                    expect(data.mass).toEqual(3.14);
+                    expect(data.temperature).toEqual(10770);
                 });
                 it("use the lower subclass if there is no higher one", () => {
                     expect(parse('M9.5V', true).data).toEqual(parse('M9V', true).data);
@@ -1417,11 +1442,11 @@ describe("Classifier", function() {
                 });
                 it("are interpolated for white dwarf temperatures", () => {
                     const data = parse('DA4.5', true).data;
-                    expect(data.mass).toEqual(0.55);
-                    expect(data.temperature).toEqual(11340);
+                    expect(data.mass).toEqual(0.5477);
+                    expect(data.temperature).toEqual(11270);
                 });
                 it("are interpolated in ranges", () => {
-                    expect(parse('A3-3.5', true).data.mass).toEqual(2.325);
+                    expect(parse('A3-3.5', true).data.mass).toEqual(2.321);
                 });
             });
 
@@ -1442,9 +1467,9 @@ describe("Classifier", function() {
                         }
                     },
                     G5_IA_IB_AVERAGE_DATA = {
-                        mass: 5.5,
-                        luminosityRelative: 98900,
-                        radiusRelative: 479,
+                        mass: 4.996,
+                        luminosityRelative: 46850,
+                        radiusRelative: 383.5,
                         temperature: 4400,
                         colourIndexBv: 1.13,
                         absoluteMagnitude: -6.1,
@@ -1468,7 +1493,7 @@ describe("Classifier", function() {
                     expect(parse('G5IIIb', true).data).toEqual(g5IIIData);
                 });
                 it("I is counted once in a luminosity range", () => {
-                    expect(parse('G5I-III', true).data.mass).toEqual(3.75);
+                    expect(parse('G5I-III', true).data.mass).toEqual(2.962);
                 });
                 it("VII has no data", () => expect(parse('G5VII', true).data).toEqual({}));
             });

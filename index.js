@@ -3,7 +3,7 @@
 const fs = require('fs'),
     tree = require('./tree').tree,
     dataLookup = require('./data').lookup,
-    NO_INFO = require('./data').NO_INFO,
+    {NO_INFO, average, getClassesInRange, getLuminositiesInRange} = require('./data'),
     grammarText = fs.readFileSync(__dirname + '/grammar.txt').toString(),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
@@ -634,19 +634,13 @@ function transformParseTree(tree) {
     return transformStar(tree.findOnly('STAR'));
 }
 
-function mergeDataObjects(dataObjects, numAdjust = n => n) {
-    const result = {},
-        count = dataObjects.length;
+function roundData(data, round = n => Number(n.toPrecision(4))) {
+    const result = {};
 
-    if (count > 0) {
-        Object.keys(dataObjects[0]).forEach(key => {
-            if (typeof dataObjects[0][key] === 'object') {
-                result[key] = mergeDataObjects(dataObjects.map(dataObject => dataObject[key]), Math.round);
-            } else {
-                result[key] = numAdjust(dataObjects.reduce((a, dataObject) => a + dataObject[key], 0) / count);
-            }
-        });
-    }
+    Object.keys(data).forEach(key => {
+        // Nested values are the RGB colour components, which are integers
+        result[key] = typeof data[key] === 'object' ? roundData(data[key], Math.round) : round(data[key]);
+    });
 
     return result;
 }
@@ -676,8 +670,7 @@ function getData(result) {
 
     } else if (result.class.range) {
         const range = result.class.range;
-        classes.push(range.from);
-        classes.push(range.to);
+        classes.push(...getClassesInRange(range.from, range.to));
 
     } else if (result.class.choice) {
         const choice = result.class.choice;
@@ -698,8 +691,8 @@ function getData(result) {
             luminosities.push(result.luminosity.value.luminosityClass);
 
         } else if (result.luminosity.range) {
-            luminosities.push(result.luminosity.range.from.luminosityClass);
-            luminosities.push(result.luminosity.range.to.luminosityClass);
+            const range = result.luminosity.range;
+            luminosities.push(...getLuminositiesInRange(range.from.luminosityClass, range.to.luminosityClass));
 
         } else if (result.luminosity.choice) {
             luminosities.push(result.luminosity.choice[0].luminosityClass);
@@ -724,7 +717,7 @@ function getData(result) {
         });
     });
 
-    return mergeDataObjects(dataObjects, n => Number(n.toPrecision(4)));
+    return dataObjects.length ? roundData(average(dataObjects)) : {};
 }
 
 function parseText(text) {

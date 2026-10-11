@@ -30,7 +30,7 @@ If the value can't be parsed then `parse` throws a `ParseError`. The error's `po
         }
     }
 
-The `parse` method has an optional second parameter which, if set to `true`, adds a `data` object containing physical attributes of the star, such as its mass, temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, and if there is no numeric sub-division then `5` is assumed. Fractional sub-divisions (e.g. `B9.5`) are interpolated between the neighbouring sub-divisions, and ranges and choices are averaged. If no data is available the `data` object is empty.
+The `parse` method has an optional second parameter which, if set to `true`, adds a `data` object containing physical attributes of the star, such as its mass, temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, and if there is no numeric sub-division then `5` is assumed. Fractional sub-divisions (e.g. `B9.5`) are interpolated between the neighbouring sub-divisions. Ranges are averaged over every class between the two ends (so `B0-B9` includes `B1` to `B8`, and `II-IV` includes `III`), and choices and combinations are averaged over the classes given. Mass, luminosity, radius and temperature are averaged on a log scale, since they vary by orders of magnitude between classes. If no data is available the `data` object is empty.
 
 ## The result
 A classification for a single star produces an object with up to three parts, `class`, `luminosity` and `peculiarities`, plus `data` if requested. For example `B2IVe:` gives:
@@ -114,5 +114,6 @@ Version 2 makes several changes that are not backwards compatible:
 * White dwarfs use `number` and `subtypes` instead of `dwarfTemperature` and `dwarfType`, carbon stars use letter `C` with `subtypes`, and S-type abundances are grouped under `abundance`
 * A bare `0` is no longer accepted as a luminosity class, so `G10` is no longer misread as a G1 hypergiant; use `Ia0` or `Ia+` instead
 * When no luminosity class is given, data is now based on a main-sequence (`V`) star instead of a bright giant (`II`)
+* Data for ranges now includes every class in the range, and mass, luminosity, radius and temperature are averaged on a log scale
 
 It also adds support for multiple stars with their own luminosities (`F5V+K0III`), `?` as an uncertainty marker, uncertainty markers after peculiarities, the `Ia0` luminosity class, and data for white dwarfs, fractional sub-divisions and more luminosity classes.

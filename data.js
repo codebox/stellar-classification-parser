@@ -50,7 +50,17 @@ const NO_INFO = Object.freeze({}),
         'Iab' : ['Ia', 'Ib']
     },
     LUMINOSITY_WITH_MODIFIER_REGEX = /^(II|III|IV|V|VI|VII)[ab]$/,
-    SPECTRAL_SEQUENCE = ['O', 'B', 'A', 'F', 'G', 'K', 'M'];
+    SPECTRAL_SEQUENCE = ['O', 'B', 'A', 'F', 'G', 'K', 'M'],
+    // These vary by orders of magnitude across the spectral classes, so are averaged on a log scale (ie geometric mean).
+    // The magnitudes are already logarithmic, and the colour values are not, so they are averaged linearly.
+    LOG_SCALE_FIELDS = ['mass', 'luminosityRelative', 'radiusRelative', 'temperature'],
+    // The main luminosity classes in data.txt, from most to least luminous
+    MAIN_LUMINOSITY_CLASSES = ['Ia0', 'Ia', 'Ib', 'II', 'III', 'IV', 'V', 'VI'],
+    // Position of each luminosity class in order of decreasing luminosity, as [lowest, highest]. 'I' covers both Ia and Ib.
+    LUMINOSITY_RANKS = {
+        'Ia0' : [0, 0], 'Ia+' : [0, 0], 'Ia' : [1, 1], 'Iab' : [1.5, 1.5], 'I' : [1, 2], 'Ib' : [2, 2],
+        'II' : [3, 3], 'III' : [4, 4], 'IV' : [5, 5], 'V' : [6, 6], 'VI' : [7, 7], 'VII' : [8, 8]
+    };
 
 function average(dataObjects, weights = dataObjects.map(() => 1)) {
     const result = {},
@@ -59,12 +69,53 @@ function average(dataObjects, weights = dataObjects.map(() => 1)) {
     Object.keys(dataObjects[0]).forEach(key => {
         if (typeof dataObjects[0][key] === 'object') {
             result[key] = average(dataObjects.map(dataObject => dataObject[key]), weights);
+        } else if (LOG_SCALE_FIELDS.includes(key)) {
+            result[key] = Math.exp(dataObjects.reduce((a, dataObject, i) => a + Math.log(dataObject[key]) * weights[i], 0) / totalWeight);
         } else {
             result[key] = dataObjects.reduce((a, dataObject, i) => a + dataObject[key] * weights[i], 0) / totalWeight;
         }
     });
 
     return result;
+}
+
+// Returns the classes from 'from' to 'to' inclusive, including each whole-numbered subclass between them, eg B8-A1
+// gives B8, B9, A0 and A1. Classes outside the O-M sequence (eg WN) are only expanded if both ends have the same letter.
+function getClassesInRange(from, to) {
+    const sameLetter = from.letter === to.letter;
+
+    if (!sameLetter && !(SPECTRAL_SEQUENCE.includes(from.letter) && SPECTRAL_SEQUENCE.includes(to.letter))) {
+        return [from, to];
+    }
+
+    // A letter without a number covers the whole letter, eg A-F means A0 to F9
+    const toPosition = (clazz, defaultNumber) => (sameLetter ? 0 : SPECTRAL_SEQUENCE.indexOf(clazz.letter) * 10) + (clazz.number === undefined ? defaultNumber : clazz.number),
+        fromClass = (position) => sameLetter ?
+            {letter : from.letter, number : position} :
+            {letter : SPECTRAL_SEQUENCE[Math.floor(position / 10)], number : Number((position % 10).toFixed(6))},
+        positions = [toPosition(from, 0), toPosition(to, 9)].sort((a, b) => a - b),
+        classPositions = [positions[0]];
+
+    for (let position = Math.floor(positions[0]) + 1; position < positions[1]; position++) {
+        classPositions.push(position);
+    }
+    if (positions[1] !== positions[0]) {
+        classPositions.push(positions[1]);
+    }
+
+    return classPositions.map(fromClass);
+}
+
+// Returns the luminosity classes from 'from' to 'to' inclusive, including any main luminosity classes between them, eg II-IV gives II, III and IV
+function getLuminositiesInRange(from, to) {
+    const baseClass = luminosity => luminosity.replace(LUMINOSITY_WITH_MODIFIER_REGEX, '$1'),
+        ranks = [LUMINOSITY_RANKS[baseClass(from)], LUMINOSITY_RANKS[baseClass(to)]].sort((a, b) => a[0] - b[0]),
+        between = MAIN_LUMINOSITY_CLASSES.filter(luminosity => {
+            const rank = LUMINOSITY_RANKS[luminosity][0];
+            return rank > ranks[0][1] && rank < ranks[1][0];
+        });
+
+    return [from, ...between, to];
 }
 
 function getNextSubclass(letter, number) {
@@ -116,6 +167,9 @@ function lookupClass(letter, number, luminosity) {
 }
 
 exports.NO_INFO = NO_INFO;
+exports.average = average;
+exports.getClassesInRange = getClassesInRange;
+exports.getLuminositiesInRange = getLuminositiesInRange;
 exports.lookup = (letter, number, luminosity) => {
     if (number === undefined || Number.isInteger(number)) {
         return lookupClass(letter, number, luminosity);
