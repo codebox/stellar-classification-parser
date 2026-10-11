@@ -589,7 +589,7 @@ function populatePeculiarities(tree, result) {
     }
 }
 
-function transformParseTree(tree) {
+function transformStar(tree) {
     const result = {};
 
     populateClassDetails(tree, result);
@@ -600,6 +600,16 @@ function transformParseTree(tree) {
     populatePeculiarities(tree, result);
 
     return result;
+}
+
+function transformParseTree(tree) {
+    if (!tree.findOptional('COMPONENTS').empty) {
+        // A system written with a separate luminosity for each star, eg F5V+K0III
+        return {
+            components : tree.find('STAR').map(transformStar)
+        };
+    }
+    return transformStar(tree.findOnly('STAR'));
 }
 
 function mergeDataObjects(dataObjects, numAdjust = n => n) {
@@ -727,7 +737,11 @@ function parse(text, augmentWithData) {
         // Copy so that callers (and the data augmentation below) can't modify the cached value
         const result = deepCopy(cachedResult);
         if (augmentWithData) {
-            result.data = getData(result);
+            if (result.components) {
+                result.components.forEach(component => component.data = getData(component));
+            } else {
+                result.data = getData(result);
+            }
         }
         return result;
     }

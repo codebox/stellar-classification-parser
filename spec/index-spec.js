@@ -1524,6 +1524,67 @@ describe("Classifier", function() {
         });
     });
 
+    describe("multiple stars with their own luminosities", function() {
+        it("are parsed as separate components", () => {
+            expect(parse('F5V+K0III')).toEqual({
+                components : [
+                    parse('F5V'),
+                    parse('K0III')
+                ]
+            });
+        });
+
+        it("keep peculiarities with their own component", () => {
+            expect(parse('B2Ve+K0III')).toEqual({
+                components : [
+                    parse('B2Ve'),
+                    parse('K0III')
+                ]
+            });
+        });
+
+        it("allow components without a luminosity after the first", () => {
+            expect(parse('K0III+F')).toEqual({
+                components : [
+                    parse('K0III'),
+                    parse('F')
+                ]
+            });
+        });
+
+        it("allow luminosity prefixes, ranges and white dwarfs as components", () => {
+            expect(parse('sdB+dM3').components).toEqual([parse('sdB'), parse('dM3')]);
+            expect(parse('G8III-IV+DA').components).toEqual([parse('G8III-IV'), parse('DA')]);
+        });
+
+        it("allow more than two components", () => {
+            expect(parse('A5V+A6V+K0III').components).toEqual([parse('A5V'), parse('A6V'), parse('K0III')]);
+        });
+
+        it("treat classes before a shared luminosity as a combination", () => {
+            expect(parse('A5+A6V').components).toBeUndefined();
+            expect(parse('A5+A6V+K0III').components).toEqual([parse('A5+A6V'), parse('K0III')]);
+        });
+
+        it("can be written with spaces", () => {
+            expect(parse('F5 V + K0 III')).toEqual(parse('F5V+K0III'));
+        });
+
+        it("must have a component on each side of every +", () => {
+            expect(parse('F5V+')).toBeUndefined();
+            expect(parse('+F5V')).toBeUndefined();
+            expect(parse('F5V++K0III')).toBeUndefined();
+        });
+
+        it("have data added to each component", () => {
+            const result = parse('F5V+K0III', true);
+            expect(result.data).toBeUndefined();
+            expect(result.components[0].data).toEqual(parse('F5V', true).data);
+            expect(result.components[1].data).toEqual(parse('K0III', true).data);
+            expect(result.components[0].data.mass).toBeGreaterThan(0);
+        });
+    });
+
     describe("spaces", function() {
         it("are ignored between parts of the classification", () => {
             expect(parse('K0 III')).toEqual(parse('K0III'));
