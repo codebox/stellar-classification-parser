@@ -1557,6 +1557,51 @@ describe("Classifier", function() {
         });
     });
 
+    describe("bracketed peculiarity codes", function() {
+        it("are marked as weak", () => {
+            expect(parse('B2V(e)').peculiarities).toEqual({
+                text : '(e)',
+                flags : {
+                    emissionLines : true
+                },
+                details : [{
+                    text : 'e',
+                    description : 'Emission lines',
+                    weak : true
+                }]
+            });
+        });
+
+        it("can be combined with other codes", () => {
+            const peculiarities = parse('O7.5III(n)((f))').peculiarities;
+            expect(peculiarities.text).toEqual('(n) ((f))');
+            expect(peculiarities.details).toEqual([
+                {text : 'n', description : 'Broad absorption due to spinning', weak : true},
+                {text : '((f))', description : 'He II and weak N III emission'}
+            ]);
+        });
+
+        it("can be marked as uncertain", () => {
+            expect(parse('B5III(n):').peculiarities.details[0]).toEqual({
+                text : 'n',
+                description : 'Broad absorption due to spinning',
+                weak : true,
+                uncertain : true
+            });
+        });
+
+        it("don't change the meaning of (f) and ((f))", () => {
+            expect(parse('O5V(f)').peculiarities.details).toEqual([{text : '(f)', description : 'N III and weak/missing He II emission'}]);
+            expect(parse('O5V((f))').peculiarities.details).toEqual([{text : '((f))', description : 'He II and weak N III emission'}]);
+        });
+
+        it("must contain a single known code", () => {
+            theText('B2V()').cannotBeParsed();
+            theText('B2V(x)').cannotBeParsed();
+            theText('B2V(e').cannotBeParsed();
+        });
+    });
+
     describe("strength indices", function() {
         it("are parsed with a negative value", () => theText("K1.5IIIFe-0.5").isParsedToExactly({
             class : {

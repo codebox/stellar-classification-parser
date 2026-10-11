@@ -562,8 +562,11 @@ function populatePeculiarities(tree, result) {
                     uncertainty : uncertainties.collectText()
                 });
             } else if (elementValue.empty) {
+                const weakSuffix = suffixValue.findOptional('WEAK_SUFFIX');
                 suffixes.push({
-                    text : suffixValue.get().join(' '),
+                    // A code in brackets, eg (n), indicates that the feature is only weakly present
+                    text : weakSuffix.empty ? suffixValue.get().join(' ') : weakSuffix.get()[0],
+                    weak : !weakSuffix.empty,
                     uncertainty : uncertainties.collectText()
                 });
             } else {
@@ -627,6 +630,9 @@ function populatePeculiarities(tree, result) {
                 text : suffix.text,
                 description : suffixDetails.description
             };
+            if (suffix.weak) {
+                details.weak = true;
+            }
         }
 
         if (suffix.uncertainty) {

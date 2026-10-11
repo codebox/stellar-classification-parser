@@ -73,7 +73,7 @@ If the class was marked as uncertain (e.g. `G5:`) then `uncertain` is `true`.
 `text` is the luminosity part of the code, and exactly one of `value`, `range` or `choice` is present, as for `class`. Each luminosity has a `luminosityClass` (e.g. `III`) and a `description` (e.g. `Giant`). A luminosity prefix such as `sd` is converted into the equivalent luminosity class. If the luminosity was marked as uncertain (e.g. `G5V?`) then `uncertain` is `true`.
 
 ### peculiarities
-`details` lists each peculiarity code in the order it appears, with a `description`. A code followed by `:` or `?` has `uncertain : true`, and an element in brackets, such as `(Sr)`, has `weak : true`. A strength index such as `Fe-0.5` has a numeric `value`. `flags` summarises which peculiarities are present, with element codes under `flags.elements`, and strength indices and their values under `flags.indices` (e.g. `{ iron : -0.5 }`). `text` is a normalised version of the peculiarities, with one space between each code.
+`details` lists each peculiarity code in the order it appears, with a `description`. A code followed by `:` or `?` has `uncertain : true`, and a code or element in brackets, such as `(n)` or `(Sr)`, has `weak : true`. A strength index such as `Fe-0.5` has a numeric `value`. `flags` summarises which peculiarities are present, with element codes under `flags.elements`, and strength indices and their values under `flags.indices` (e.g. `{ iron : -0.5 }`). `text` is a normalised version of the peculiarities, with one space between each code.
 
 ### Multiple stars
 A code describing several stars, each with its own luminosity, such as `F5V+K0III`, produces a `components` list, where each item is the result for one star in the format described above. When data is requested, each component gets its own `data`. A class without a luminosity is combined with the class after it, so `A5+A6V` is a single result with a `combination` class.
@@ -97,7 +97,7 @@ Among other things, the parser understands:
 * Multiple stars that each have their own luminosity e.g. `F5V+K0III`
 * Luminosity prefixes (`sd`, `d`, `sg`, `g`) or suffixes (`I`, `Ia0`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
 * Luminosity suffix ranges and alternatives e.g. `O7V-VI` and `O7V/VI`
-* Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`, and element codes such as `Sr` or `HgMn`
+* Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`, and element codes such as `Sr` or `HgMn`. Codes in brackets, such as `(n)` or `(e)`, indicate a weak feature
 * Strength indices for iron, CN, CH, barium, C2 and calcium e.g. `K1.5IIIFe-0.5` or `G8III CN+1 Ba2`
 * Uncertainty markers `:` or `?` after the class, luminosity, or any peculiarity code e.g. `G5:`, `G0V?` or `B2IVe:`
 * Codes for S-type stars including abundance indications for `ZrO/TiO`, `C/O` and `ZrO`
