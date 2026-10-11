@@ -355,12 +355,12 @@ function populateSTypeClassDetails(tree, result) {
         }
     }
     if (isSType()) {
-        const classDetails = result.class = {
+        result.class = {
+            text : tree.findOnly('S_TYPE').collectText(),
             value : {
                 letter : 'S'
             }
         };
-        classDetails.text = tree.findOnly('S_TYPE').collectText();
 
         const baseNumber = getBaseNumber();
         if (baseNumber !== undefined) {
@@ -405,12 +405,12 @@ function populateWhiteDwarfDetails(tree, result) {
     }
 
     if (isWhiteDwarf()) {
-        const classDetails = result.class = {
+        result.class = {
+            text : 'D' + tree.findOptional('DWARF_TYPES').collectText() + tree.findOptional('DWARF_TEMPERATURE').collectText(),
             value : {
                 letter : 'D'
             }
         };
-        classDetails.text = 'D' + tree.findOptional('DWARF_TYPES').collectText() + tree.findOptional('DWARF_TEMPERATURE').collectText();
 
         // For white dwarfs the number is the temperature index, 50400/T
         const temperature = getTemperature();
