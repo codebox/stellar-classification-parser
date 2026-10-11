@@ -63,6 +63,7 @@ A classification for a single star produces an object with up to three parts, `c
 
 Each class has a `letter` and, if one was given, a `number`. Some types of star have extra information:
 
+* Wolf-Rayet stars may have `subtypes` for early or late types and qualifiers, e.g. `WN7h` gives letter `WN` and code `h`
 * White dwarfs (`D`) have `subtypes`, a list of `{code, description}`, e.g. `DAB` gives codes `A` and `B`. The `number` is the temperature index
 * Carbon stars have letter `C` and a single subtype, e.g. `C-N` gives code `N`
 * S-type stars may have an `abundance` object containing one of `ZrOTiORatio`, `CORatio` or `ZrOStrength`
@@ -91,6 +92,8 @@ I'm happy to accept pull requests if anything important is missing or incorrect.
 Among other things, the parser understands:
 
 * The standard `O`, `B`, `A`, `F`, `G`, `K`, and `M` letter codes with or without numeric sub-divisions
+* Brown dwarf classes `L`, `T` and `Y`
+* Wolf-Rayet classes `WN`, `WC`, `WO` and `WR`, early and late types such as `WNE` and `WNL`, and the qualifiers `h`, `ha`, `(h)`, `o` and `b` e.g. `WN7h`
 * Ranges of letter/number codes e.g. `A5-6` or `A5-A6`
 * Alternative letter/number codes e.g. `A5/A6`
 * Combinations of letter/number codes e.g. `A5+A6`

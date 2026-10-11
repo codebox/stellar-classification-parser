@@ -1557,6 +1557,70 @@ describe("Classifier", function() {
         });
     });
 
+    describe("brown dwarfs", function() {
+        it("L, T and Y are valid classes", () => {
+            expect(parse('L2').class.value).toEqual({letter : 'L', number : 2});
+            expect(parse('T6.5').class.value).toEqual({letter : 'T', number : 6.5});
+            expect(parse('Y0').class.value).toEqual({letter : 'Y', number : 0});
+        });
+
+        it("follow M in ranges", () => {
+            expect(parse('M9-L2').class.range).toEqual({from : {letter : 'M', number : 9}, to : {letter : 'L', number : 2}});
+        });
+
+        it("have no data, so ranges and interpolation use the M class data", () => {
+            expect(parse('L2', true).data).toEqual({});
+            expect(parse('M9.5V', true).data).toEqual(parse('M9V', true).data);
+            expect(parse('M9-L2V', true).data).toEqual(parse('M9V', true).data);
+        });
+    });
+
+    describe("Wolf-Rayet stars", function() {
+        function wolfRayet(letter, number, subtypes) {
+            const value = {letter};
+            if (number !== undefined) {
+                value.number = number;
+            }
+            if (subtypes) {
+                value.subtypes = subtypes;
+            }
+            return value;
+        }
+
+        it("WN, WC, WO and WR are valid classes", () => {
+            expect(parse('WN5').class.value).toEqual(wolfRayet('WN', 5));
+            expect(parse('WC8').class.value).toEqual(wolfRayet('WC', 8));
+            expect(parse('WO3').class.value).toEqual(wolfRayet('WO', 3));
+            expect(parse('WR').class.value).toEqual(wolfRayet('WR'));
+        });
+
+        it("early and late types are sub-types", () => {
+            expect(parse('WNL').class.value).toEqual(wolfRayet('WN', undefined, [{code : 'L', description : 'Late (cooler) type'}]));
+            expect(parse('WCE').class.value).toEqual(wolfRayet('WC', undefined, [{code : 'E', description : 'Early (hotter) type'}]));
+        });
+
+        it("hydrogen and line width qualifiers are sub-types", () => {
+            expect(parse('WN7h').class.value).toEqual(wolfRayet('WN', 7, [{code : 'h', description : 'Hydrogen emission lines'}]));
+            expect(parse('WN6ha').class.value).toEqual(wolfRayet('WN', 6, [{code : 'ha', description : 'Hydrogen emission and absorption lines'}]));
+            expect(parse('WN8(h)').class.value).toEqual(wolfRayet('WN', 8, [{code : '(h)', description : 'Weak hydrogen emission lines'}]));
+            expect(parse('WN5o').class.value).toEqual(wolfRayet('WN', 5, [{code : 'o', description : 'No hydrogen lines'}]));
+            expect(parse('WN4b').class.value).toEqual(wolfRayet('WN', 4, [{code : 'b', description : 'Broad emission lines'}]));
+        });
+
+        it("text includes the qualifiers", () => {
+            expect(parse('WN7h').class.text).toEqual('WN7h');
+        });
+
+        it("qualifiers don't affect the data", () => {
+            expect(parse('WN7h', true).data).toEqual(parse('WN7', true).data);
+        });
+
+        it("qualifiers are only allowed on Wolf-Rayet classes", () => {
+            theText('O7h').cannotBeParsed();
+            theText('WN7x').cannotBeParsed();
+        });
+    });
+
     describe("bracketed peculiarity codes", function() {
         it("are marked as weak", () => {
             expect(parse('B2V(e)').peculiarities).toEqual({

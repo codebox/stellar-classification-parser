@@ -50,7 +50,7 @@ const NO_INFO = Object.freeze({}),
         'Iab' : ['Ia', 'Ib']
     },
     LUMINOSITY_WITH_MODIFIER_REGEX = /^(II|III|IV|V|VI|VII)[ab]$/,
-    SPECTRAL_SEQUENCE = ['O', 'B', 'A', 'F', 'G', 'K', 'M'],
+    SPECTRAL_SEQUENCE = ['O', 'B', 'A', 'F', 'G', 'K', 'M', 'L', 'T', 'Y'],
     // These vary by orders of magnitude across the spectral classes, so are averaged on a log scale (ie geometric mean).
     // The magnitudes are already logarithmic, and the colour values are not, so they are averaged linearly.
     LOG_SCALE_FIELDS = ['mass', 'luminosityRelative', 'radiusRelative', 'temperature'],

@@ -146,6 +146,15 @@ const fs = require('fs'),
         'C2' : {flagName : 'dicarbon', description : 'C2 (Swan band)'},
         'Ca' : {flagName : 'calcium', description : 'Calcium'}
     },
+    WOLF_RAYET_SUBTYPES = {
+        'E' : 'Early (hotter) type',
+        'L' : 'Late (cooler) type',
+        'h' : 'Hydrogen emission lines',
+        'ha' : 'Hydrogen emission and absorption lines',
+        '(h)' : 'Weak hydrogen emission lines',
+        'o' : 'No hydrogen lines',
+        'b' : 'Broad emission lines'
+    },
     WHITE_DWARF_SUBTYPES = {
         'A' : 'Hydrogen lines',
         'B' : 'Neutral helium lines',
@@ -249,10 +258,26 @@ function populateClassDetails(tree, result) {
     }
     function getClasses() {
         return tree.find('CLASS').map(classTree => {
-            const result = {};
+            const result = {},
+                wolfRayetLetter = classTree.findOptional('WOLF_RAYET_LETTER');
+            let subtypeCodes = [];
 
-            classTree.onOnlyValue('CLASS_LETTER', letter => result.letter = letter[0]);
+            if (wolfRayetLetter.empty) {
+                classTree.onOnlyValue('CLASS_LETTER', letter => result.letter = letter[0]);
+            } else {
+                // eg WNL is a WN star of the late (L) sub-type
+                const letterText = wolfRayetLetter.get()[0];
+                result.letter = letterText.substr(0, 2);
+                subtypeCodes = [...letterText.substr(2).split('').filter(code => code), ...classTree.find('WOLF_RAYET_QUALIFIER').map(q => q.collectText())];
+            }
             classTree.onOptionalValue('CLASS_NUMBER', classNumber => result.number = Number(classNumber.collectText()));
+
+            if (subtypeCodes.length) {
+                result.subtypes = subtypeCodes.map(code => ({
+                    code,
+                    description : WOLF_RAYET_SUBTYPES[code]
+                }));
+            }
 
             return result;
         });
