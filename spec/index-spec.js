@@ -162,37 +162,9 @@ describe("Classifier", function() {
                 }
             });
         });
-        it("combination of two letters handled correctly", () => {
-            theText("A+F").isParsedToExactly({
-                class : {
-                    text : 'A+F',
-                    combination : [
-                        {
-                            letter : 'A'
-                        },
-                        {
-                            letter : 'F'
-                        }
-                    ]
-                }
-            });
-        });
-        it("combination of two letters with numbers handled correctly", () => {
-            theText("A2+F3").isParsedToExactly({
-                class : {
-                    text : 'A2+F3',
-                    combination : [
-                        {
-                            letter : 'A',
-                            number : 2
-                        },
-                        {
-                            letter : 'F',
-                            number : 3
-                        }
-                    ]
-                }
-            });
+        it("letters joined by + are separate stars", () => {
+            expect(parse('A+F')).toEqual({components : [parse('A'), parse('F')]});
+            expect(parse('A2+F3')).toEqual({components : [parse('A2'), parse('F3')]});
         });
         it("letters with fractional number ranges are handled correctly", () => {
             theText("B0.5-1.5").isParsedToExactly({
@@ -1454,23 +1426,10 @@ describe("Classifier", function() {
                 })
             });
 
-            it("letter and number combination", () => {
-                const data = parse('A3+A9', true).data;
-                expect(data).toEqual({
-                    mass: 2.02,
-                    luminosityRelative: 15.99,
-                    radiusRelative: 1.962,
-                    temperature: 8366,
-                    colourIndexBv: 0.1,
-                    absoluteMagnitude: 1.95,
-                    bolometricCorrection: -0.21,
-                    bolometricMagnitude: 1.74,
-                    colour: {
-                        r: 205,
-                        g: 216,
-                        b: 255
-                    }
-                })
+            it("multiple stars have separate data", () => {
+                const result = parse('A3+A9', true);
+                expect(result.data).toBeUndefined();
+                expect(result.components.map(c => c.data)).toEqual([parse('A3', true).data, parse('A9', true).data]);
             });
 
             it("luminosity range", () => {
@@ -2108,9 +2067,10 @@ describe("Classifier", function() {
             expect(parse('A5V+A6V+K0III').components).toEqual([parse('A5V'), parse('A6V'), parse('K0III')]);
         });
 
-        it("treat classes before a shared luminosity as a combination", () => {
-            expect(parse('A5+A6V').components).toBeUndefined();
-            expect(parse('A5+A6V+K0III').components).toEqual([parse('A5+A6V'), parse('K0III')]);
+        it("are always separated by +, even when only the last has a luminosity", () => {
+            expect(parse('A5+A6V').components).toEqual([parse('A5'), parse('A6V')]);
+            expect(parse('A5V+A6+K0III').components).toEqual([parse('A5V'), parse('A6'), parse('K0III')]);
+            expect(parse('A5-6+F').components).toEqual([parse('A5-6'), parse('F')]);
         });
 
         it("can be written with spaces", () => {

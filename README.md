@@ -30,7 +30,7 @@ If the value can't be parsed then `parse` throws a `ParseError`. The error's `po
         }
     }
 
-The `parse` method has an optional second parameter which, if set to `true`, adds a `data` object containing physical attributes of the star, such as its mass, temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, except for carbon and S-type stars where a giant (`III`) is assumed, and if there is no numeric sub-division then `5` is assumed. Fractional sub-divisions (e.g. `B9.5`) are interpolated between the neighbouring sub-divisions. Ranges are averaged over every class between the two ends (so `B0-B9` includes `B1` to `B8`, and `II-IV` includes `III`), and choices and combinations are averaged over the classes given. Luminosity class `VII` (an old notation for white dwarfs) uses the data for a `DA` white dwarf of the same temperature. Mass, luminosity, radius and temperature are averaged on a log scale, since they vary by orders of magnitude between classes. If no data is available the `data` object is empty.
+The `parse` method has an optional second parameter which, if set to `true`, adds a `data` object containing physical attributes of the star, such as its mass, temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, except for carbon and S-type stars where a giant (`III`) is assumed, and if there is no numeric sub-division then `5` is assumed. Fractional sub-divisions (e.g. `B9.5`) are interpolated between the neighbouring sub-divisions. Ranges are averaged over every class between the two ends (so `B0-B9` includes `B1` to `B8`, and `II-IV` includes `III`), and choices are averaged over the classes given. Luminosity class `VII` (an old notation for white dwarfs) uses the data for a `DA` white dwarf of the same temperature. Mass, luminosity, radius and temperature are averaged on a log scale, since they vary by orders of magnitude between classes. If no data is available the `data` object is empty.
 
 The module has no dependencies and doesn't use any Node-specific modules, so it can also be used in a browser via a bundler such as esbuild, webpack or Rollup.
 
@@ -61,7 +61,6 @@ A classification for a single star produces an object with up to three parts, `c
 * `value` - a single class, e.g. `G5`
 * `range` - a range of classes with `from` and `to`, e.g. `A3-5` or `A3-F2`. Ranges are always reported hottest first, so `K0-G8` has `from` G8 and `to` K0
 * `choice` - a list of alternative classes, e.g. `A3/5` or `A3/F2`
-* `combination` - a list of classes that share a luminosity, e.g. `A5+A6V`
 
 Each class has a `letter` and, if one was given, a `number`. Some types of star have extra information:
 
@@ -80,7 +79,7 @@ If the class was marked as uncertain (e.g. `G5:`) then `uncertain` is `true`.
 `details` lists each peculiarity code in the order it appears, with a `description`. A code followed by `:` or `?` has `uncertain : true`, and a code or element in brackets, such as `(n)` or `(Sr)`, has `weak : true`. A strength index such as `Fe-0.5` has a numeric `value`. `flags` summarises which peculiarities are present, with element codes under `flags.elements`, and strength indices and their values under `flags.indices` (e.g. `{ iron : -0.5 }`). `text` is a normalised version of the peculiarities, with one space between each code.
 
 ### Multiple stars
-A code describing several stars, each with its own luminosity, such as `F5V+K0III`, produces a `components` list, where each item is the result for one star in the format described above. When data is requested, each component gets its own `data`. A class without a luminosity is combined with the class after it, so `A5+A6V` is a single result with a `combination` class.
+A code describing several stars separated by `+`, such as `F5V+K0III`, produces a `components` list, where each item is the result for one star in the format described above. When data is requested, each component gets its own `data`. A luminosity only applies to the star it follows, so `A5+A6V` is an `A5` star with no luminosity and an `A6V` star.
 
 ## Using the Web Service
 The module is also available to use via a Web Service hosted at `https://api.codebox.net/starclass/parse`. To use it, simply add the value to be parsed on to the end of the url, for example: [https://api.codebox.net/starclass/parse/G5V](https://api.codebox.net/starclass/parse/G5V)
@@ -100,8 +99,7 @@ Among other things, the parser understands:
 * Wolf-Rayet classes `WN`, `WC`, `WO` and `WR`, early and late types such as `WNE` and `WNL`, and the qualifiers `h`, `ha`, `(h)`, `o` and `b` e.g. `WN7h`
 * Ranges of letter/number codes e.g. `A5-6` or `A5-A6`
 * Alternative letter/number codes e.g. `A5/A6`
-* Combinations of letter/number codes e.g. `A5+A6`
-* Multiple stars that each have their own luminosity e.g. `F5V+K0III`
+* Multiple stars separated by `+` e.g. `A5+A6` or `F5V+K0III`
 * Luminosity prefixes (`sd`, `esd`, `usd`, `d`, `sg`, `g`, `c`) or suffixes (`I`, `Ia0`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
 * Luminosity suffix ranges and alternatives e.g. `O7V-VI` and `O7V/VI`, including shorthand such as `Iab-b` (Iab to Ib) or `IIIa/b` (IIIa or IIIb)
 * Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`, and element codes such as `Sr` or `HgMn`. Codes in brackets, such as `(n)` or `(e)`, indicate a weak feature
@@ -120,6 +118,7 @@ Version 2 makes several changes that are not backwards compatible:
 * Uncertainty is reported as `uncertain : true` on the class, luminosity or peculiarity, instead of as `class.peculiarities` or `luminosity.peculiarities`
 * Peculiarities are listed in the order they appear, bracketed elements have `weak : true`, and `peculiarities.text` is normalised with one space between codes
 * White dwarfs use `number` and `subtypes` instead of `dwarfTemperature` and `dwarfType`, carbon stars use letter `C` with `subtypes`, and S-type abundances are grouped under `abundance`
+* `+` always separates stars, which are returned as a `components` list, instead of `A5+A6` producing a `combination` class
 * A bare `0` is no longer accepted as a luminosity class, so `G10` is no longer misread as a G1 hypergiant; use `Ia0` or `Ia+` instead
 * When no luminosity class is given, data is now based on a main-sequence (`V`) star instead of a bright giant (`II`)
 * Data for ranges now includes every class in the range, and mass, luminosity, radius and temperature are averaged on a log scale
