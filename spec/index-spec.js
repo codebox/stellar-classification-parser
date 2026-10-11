@@ -1191,6 +1191,28 @@ describe("Classifier", function() {
             }));
         });
     });
+    describe('White Dwarf extras', () => {
+        it('uncertainty after the type', () => expect(parse('DA?').class.uncertain).toBe(true));
+        it('uncertainty after the temperature', () => expect(parse('DA4:').class).toEqual({
+            text : 'DA4',
+            value : {
+                letter : 'D',
+                number : 4,
+                subtypes : [{code : 'A', description : 'Hydrogen lines'}]
+            },
+            uncertain : true
+        }));
+        it('uncertainty before peculiarities', () => {
+            const result = parse('DA:H');
+            expect(result.class.uncertain).toBe(true);
+            expect(result.peculiarities.text).toEqual('H');
+        });
+        it('X peculiarity', () => expect(parse('DA4X').peculiarities.details).toEqual([{text : 'X', description : 'Peculiar or unclassifiable spectrum'}]));
+        it('X directly after the types is a sub-type', () => expect(parse('DAX').class.value.subtypes.map(s => s.code)).toEqual(['A', 'X']));
+        it('dust peculiarity', () => expect(parse('DAZd').peculiarities.flags).toEqual({circumstellarDust : true}));
+        it('lower-case e for emission', () => expect(parse('DAe').peculiarities.flags).toEqual({emissionLines : true}));
+        it('as a companion', () => expect(parse('G8III+DA:').components[1].class.uncertain).toBe(true));
+    });
     describe('carbon stars', () => {
         function carbonStarOfType(code, description) {
             return {

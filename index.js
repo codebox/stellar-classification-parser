@@ -54,6 +54,15 @@ const fs = require('fs'),
                 flagName : 'emissionLines',
                 description : 'Emission lines present'
             },
+            'e' : 'E',
+            'X' : {
+                flagName : 'peculiarOrUnclassifiable',
+                description : 'Peculiar or unclassifiable spectrum'
+            },
+            'd' : {
+                flagName : 'circumstellarDust',
+                description : 'Circumstellar dust'
+            },
             'H' : {
                 flagName : 'magneticUnpolarized',
                 description : 'Magnetic white dwarf without detectable polarization'
@@ -445,6 +454,10 @@ function populateWhiteDwarfDetails(tree, result) {
                 letter : 'D'
             }
         };
+
+        if (tree.find('CLASSES_SUFFIX').length) {
+            result.class.uncertain = true;
+        }
 
         // For white dwarfs the number is the temperature index, 50400/T
         const temperature = getTemperature();

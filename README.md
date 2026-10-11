@@ -104,7 +104,7 @@ Among other things, the parser understands:
 * Strength indices for iron, CN, CH, barium, C2 and calcium e.g. `K1.5IIIFe-0.5` or `G8III CN+1 Ba2`
 * Uncertainty markers `:` or `?` after the class, luminosity, or any peculiarity code e.g. `G5:`, `G0V?` or `B2IVe:`
 * Codes for S-type stars including abundance indications for `ZrO/TiO`, `C/O` and `ZrO`, and the intermediate `MS` and `SC` types e.g. `S4/2 III` or `SC5/9`
-* White dwarf codes `DA`, `DB`, `DO`, `DQ`, `DZ`, `DC` and `DX` with or without numeric suffixes, as well as peculiarity codes `P`, `E`, `H`, `V`, `PEC`
+* White dwarf codes `DA`, `DB`, `DO`, `DQ`, `DZ`, `DC` and `DX` with or without numeric suffixes, as well as peculiarity codes `P`, `E` (or `e`), `H`, `V`, `X`, `d`, `PEC` and uncertainty markers e.g. `DA4:`
 * Carbon star types `C-R`, `C-N`, `C-J`, `C-H`, `C-Hd` with optional numbers e.g. `C-N5`, the older `C5,4` notation, and the historical `R` and `N` classes
 
 Spaces are ignored, so `K0 III` is treated the same as `K0III`, and `B8 III p HgMn` the same as `B8IIIpHgMn`.
