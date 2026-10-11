@@ -1677,6 +1677,15 @@ describe("Classifier", function() {
             expect(parse('F5 V + K0 III')).toEqual(parse('F5V+K0III'));
         });
 
+        it("can follow an Ia+ luminosity", () => {
+            expect(parse('B1Ia++O9V').components).toEqual([parse('B1Ia+'), parse('O9V')]);
+            expect(parse('B1Ia+ + O9V').components).toEqual([parse('B1Ia+'), parse('O9V')]);
+        });
+
+        it("are read as a separator after Ia if there is no other +", () => {
+            expect(parse('B1Ia+O9V').components).toEqual([parse('B1Ia'), parse('O9V')]);
+        });
+
         it("must have a component on each side of every +", () => {
             expect(parse('F5V+')).toBeUndefined();
             expect(parse('+F5V')).toBeUndefined();

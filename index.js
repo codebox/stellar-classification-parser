@@ -12,7 +12,7 @@ const fs = require('fs'),
     // Well above the length of any real classification, but short enough that the recursive parser can't overflow the stack
     MAX_INPUT_LENGTH = 100,
     cache = new Map(),
-    parser = require('top-down-parser').buildParser(grammarText, START_SYMBOL, EPSILON),
+    parser = require('./parser').buildParser(grammarText, START_SYMBOL, EPSILON),
     LUMINOSITY_DESCRIPTIONS = {
         '0' : 'Hypergiant',
         'Ia0' : 'Hypergiant',
@@ -732,7 +732,7 @@ function parseText(text) {
     const parseResult = parser.parse(text);
     let result;
 
-    if (parseResult && !parseResult.remainder) {
+    if (parseResult.success) {
         const treeWrapper = tree(parseResult.tree);
         result = transformParseTree(treeWrapper);
     } else {
