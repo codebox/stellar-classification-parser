@@ -122,5 +122,16 @@ Version 2 makes several changes that are not backwards compatible:
 * A bare `0` is no longer accepted as a luminosity class, so `G10` is no longer misread as a G1 hypergiant; use `Ia0` or `Ia+` instead
 * When no luminosity class is given, data is now based on a main-sequence (`V`) star instead of a bright giant (`II`)
 * Data for ranges now includes every class in the range, and mass, luminosity, radius and temperature are averaged on a log scale
+* Ranges are reported in order (hottest, or most luminous, first) even if written backwards
+* `K` is no longer accepted as an element code for potassium
+* Carbon and S-type stars with no luminosity class now use giant (`III`) data
 
-It also adds support for multiple stars with their own luminosities (`F5V+K0III`), `?` as an uncertainty marker, uncertainty markers after peculiarities, the `Ia0` luminosity class, and data for white dwarfs, fractional sub-divisions and more luminosity classes.
+It also adds support for:
+
+* Multiple stars with their own luminosities (`F5V+K0III`)
+* Brown dwarfs (`L`, `T`, `Y`), more Wolf-Rayet notation (`WO`, `WNL`, `WN7h`), Am stars (`kA2hA5mA7V`), modern carbon star notation (`C-N5`, `C5,4`), `MS` and `SC` types, and luminosities and peculiarities on carbon and S-type stars
+* Strength indices (`Fe-0.5`, `CN+1`), bracketed peculiarity codes (`(n)`), `?` as an uncertainty marker, uncertainty markers after peculiarities and on white dwarfs, and more white dwarf peculiarity codes
+* The `Ia0` luminosity class, the `c`, `esd` and `usd` prefixes, and shorthand luminosity ranges (`Iab-b`)
+* Data for white dwarfs, carbon stars, luminosity class `VII`, fractional sub-divisions and more luminosity classes
+* Error messages giving the position of the problem
+* Use in browsers, as the module no longer uses any Node-specific modules
