@@ -32,6 +32,8 @@ If the value can't be parsed then `parse` throws a `ParseError`. The error's `po
 
 The `parse` method has an optional second parameter which, if set to `true`, adds a `data` object containing physical attributes of the star, such as its mass, temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, except for carbon and S-type stars where a giant (`III`) is assumed, and if there is no numeric sub-division then `5` is assumed. Fractional sub-divisions (e.g. `B9.5`) are interpolated between the neighbouring sub-divisions. Ranges are averaged over every class between the two ends (so `B0-B9` includes `B1` to `B8`, and `II-IV` includes `III`), and choices and combinations are averaged over the classes given. Luminosity class `VII` (an old notation for white dwarfs) uses the data for a `DA` white dwarf of the same temperature. Mass, luminosity, radius and temperature are averaged on a log scale, since they vary by orders of magnitude between classes. If no data is available the `data` object is empty.
 
+The module has no dependencies and doesn't use any Node-specific modules, so it can also be used in a browser via a bundler such as esbuild, webpack or Rollup.
+
 ## The result
 A classification for a single star produces an object with up to three parts, `class`, `luminosity` and `peculiarities`, plus `data` if requested. For example `B2IVe:` gives:
 
@@ -88,7 +90,7 @@ You can try out the web service in the [online demo](https://codebox.net/pages/s
 ## The Parser
 The parser understands a large subset of the commonly used parts of the MK system, but probably not all of it. There does not appear to be any complete and universally accepted definition of exactly what notation is valid and what isn't. I found various online sources using different notation to indicate the same thing, and many examples of dialects that seem to be unique to a particular author and not used anywhere else.
 
-I'm happy to accept pull requests if anything important is missing or incorrect. See [this grammar](https://github.com/codebox/stellar-classification-parser/blob/master/grammar.txt) for more insight into what will currently work.
+I'm happy to accept pull requests if anything important is missing or incorrect. See [this grammar](https://github.com/codebox/stellar-classification-parser/blob/master/grammar.js) for more insight into what will currently work.
 
 Among other things, the parser understands:
 

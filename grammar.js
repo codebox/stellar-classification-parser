@@ -1,3 +1,12 @@
+"use strict";
+
+// The grammar for MK classification codes, in the format read by parser.js:
+//
+//     SYMBOL -> part part | part | ε
+//
+// Parts that are defined as symbols are non-terminals, anything else is a terminal string.
+
+module.exports = `
 START                   -> STAR | COMPONENTS
 
 STAR                    -> AM_CLASSES LUMINOSITIES SUFFIXES | AM_CLASSES SUFFIXES | LUMINOSITY_PREFIX CLASSES SUFFIXES | CLASSES LUMINOSITIES SUFFIXES | CLASSES SUFFIXES | S_TYPE LUMINOSITIES SUFFIXES | S_TYPE SUFFIXES | WHITE_DWARF | CARBON_STAR LUMINOSITIES SUFFIXES | CARBON_STAR SUFFIXES
@@ -80,3 +89,4 @@ DWARF_PECULIARITY       -> P | E | e | H | V | X | d | PEC
 CARBON_STAR             -> CARBON_TYPE CLASS_NUMBER | C CLASS_NUMBER CARBON_C2_STRENGTH
 CARBON_TYPE             -> C-R | C-N | C-J | C-H | C-Hd
 CARBON_C2_STRENGTH      -> , NUMBER | ε
+`;

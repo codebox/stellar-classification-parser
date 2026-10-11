@@ -1,10 +1,9 @@
 "use strict";
 
-const fs = require('fs'),
-    tree = require('./tree').tree,
+const tree = require('./tree').tree,
     dataLookup = require('./data').lookup,
     {NO_INFO, average, getClassesInRange, getLuminositiesInRange, compareClasses, compareLuminosities} = require('./data'),
-    grammarText = fs.readFileSync(__dirname + '/grammar.txt').toString(),
+    grammarText = require('./grammar'),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
     MAX_CACHE_SIZE = 1000,
@@ -846,7 +845,7 @@ function getData(result) {
             });
 
         } else if (value.letter === 'C') {
-            // C-R and C-N correspond to the older R and N classes. data.txt has no data for the other carbon star sub-types.
+            // C-R and C-N correspond to the older R and N classes. data-table.js has no data for the other carbon star sub-types.
             const subtype = value.subtypes && value.subtypes[0].code;
             if (!subtype) {
                 classes.push(value);

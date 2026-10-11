@@ -1,7 +1,7 @@
 "use strict";
 
 /*
- * A backtracking parser for grammars written in the format used by grammar.txt:
+ * A backtracking parser for grammars written in the format used by grammar.js:
  *
  *     SYMBOL -> part part | part | ε
  *

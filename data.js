@@ -1,6 +1,6 @@
 "use strict";
 
-const lineObjects = require('fs').readFileSync(__dirname +  '/data.txt').toString()
+const lineObjects = require('./data-table')
     .split('\n')
     .map(l => l.trim())
     .filter(l => l)
@@ -43,7 +43,7 @@ lineObjects.forEach(obj => {
 });
 
 const NO_INFO = Object.freeze({}),
-    // Luminosity classes that the parser can return, but which don't appear directly in data.txt
+    // Luminosity classes that the parser can return, but which don't appear directly in data-table.js
     LUMINOSITY_ALIASES = {
         'Ia+' : ['Ia0'],
         'I' : ['Ia', 'Ib'],
@@ -54,7 +54,7 @@ const NO_INFO = Object.freeze({}),
     // These vary by orders of magnitude across the spectral classes, so are averaged on a log scale (ie geometric mean).
     // The magnitudes are already logarithmic, and the colour values are not, so they are averaged linearly.
     LOG_SCALE_FIELDS = ['mass', 'luminosityRelative', 'radiusRelative', 'temperature'],
-    // The main luminosity classes in data.txt, from most to least luminous
+    // The main luminosity classes in data-table.js, from most to least luminous
     MAIN_LUMINOSITY_CLASSES = ['Ia0', 'Ia', 'Ib', 'II', 'III', 'IV', 'V', 'VI'],
     // Position of each luminosity class in order of decreasing luminosity, as [lowest, highest]. 'I' covers both Ia and Ib.
     LUMINOSITY_RANKS = {
@@ -149,7 +149,7 @@ function getLuminosityKeys(luminosity) {
     if (LUMINOSITY_ALIASES[luminosity]) {
         return LUMINOSITY_ALIASES[luminosity];
     }
-    // data.txt doesn't distinguish the 'a' and 'b' sub-divisions, eg 'IIIa' uses the data for 'III'
+    // data-table.js doesn't distinguish the 'a' and 'b' sub-divisions, eg 'IIIa' uses the data for 'III'
     return [luminosity.replace(LUMINOSITY_WITH_MODIFIER_REGEX, '$1')];
 }
 
@@ -198,7 +198,7 @@ exports.lookup = (letter, number, luminosity) => {
         return lookupClass(letter, number, luminosity);
     }
 
-    // data.txt only has whole-number subclasses, so interpolate between the two nearest ones, eg A3.5 is halfway between A3 and A4
+    // data-table.js only has whole-number subclasses, so interpolate between the two nearest ones, eg A3.5 is halfway between A3 and A4
     const lowerNumber = Math.floor(number),
         fraction = number - lowerNumber,
         upper = getNextSubclass(letter, lowerNumber),
