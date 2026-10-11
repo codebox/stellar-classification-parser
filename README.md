@@ -19,7 +19,17 @@ and call the `parse` function in your code, like this:
     console.log(JSON.stringify(result));
 
 
-If the value can't be parsed then `parse` returns `undefined`. This includes values that aren't strings, and strings longer than 100 characters.
+If the value can't be parsed then `parse` throws a `ParseError`. The error's `position` property gives the index of the first character that couldn't be parsed, and `expected` lists the text that would have been valid at that point. Strings longer than 100 characters also throw a `ParseError`, and values that aren't strings throw a `TypeError`.
+
+    const {parse, ParseError} = require('stellar-classification-parser');
+
+    try {
+        parse('G5X');
+    } catch (e) {
+        if (e instanceof ParseError) {
+            console.log(e.message);  // Unexpected 'X' at position 2 in 'G5X'
+        }
+    }
 
 The `parse` method has an optional second parameter which, if set to `true`, may return some additional data related to the physical attributes of the star, such as its temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, and if there is no numeric sub-division then `5` is assumed.
 

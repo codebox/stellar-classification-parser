@@ -7,9 +7,8 @@ const fs = require('fs'),
     grammarText = fs.readFileSync(__dirname + '/grammar.txt').toString(),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
-    UNABLE_TO_PARSE = 'nope',
     MAX_CACHE_SIZE = 1000,
-    // Well above the length of any real classification, but short enough that the recursive parser can't overflow the stack
+    // Well above the length of any real classification, but short enough to keep parsing time and recursion depth small
     MAX_INPUT_LENGTH = 100,
     cache = new Map(),
     parser = require('./parser').buildParser(grammarText, START_SYMBOL, EPSILON),
@@ -192,6 +191,23 @@ const fs = require('fs'),
             description : 'Potassium'
         }
     };
+
+class ParseError extends Error {
+    constructor(input, position, expected, message) {
+        super(message || ParseError.buildMessage(input, position));
+        this.name = 'ParseError';
+        this.input = input;
+        this.position = position;
+        this.expected = expected;
+    }
+
+    static buildMessage(input, position) {
+        if (position >= input.length) {
+            return `Unexpected end of input in '${input}'`;
+        }
+        return `Unexpected '${input[position]}' at position ${position} in '${input}'`;
+    }
+}
 
 function populateDuplicates(obj) {
     Object.keys(obj).forEach(k => {
@@ -721,9 +737,9 @@ function parseText(text) {
 
     if (parseResult.success) {
         const treeWrapper = tree(parseResult.tree);
-        result = transformParseTree(treeWrapper);
+        result = {value : transformParseTree(treeWrapper)};
     } else {
-        result = UNABLE_TO_PARSE;
+        result = {error : {position : parseResult.position, expected : parseResult.expected}};
     }
 
     if (cache.size >= MAX_CACHE_SIZE) {
@@ -736,24 +752,30 @@ function parseText(text) {
 }
 
 function parse(text, augmentWithData) {
-    if (typeof text !== 'string' || text.length > MAX_INPUT_LENGTH) {
-        return;
+    if (typeof text !== 'string') {
+        throw new TypeError(`Expected a string to parse but received ${text === null ? 'null' : typeof text}`);
+    }
+    if (text.length > MAX_INPUT_LENGTH) {
+        throw new ParseError(text, MAX_INPUT_LENGTH, [], `Input is longer than the maximum of ${MAX_INPUT_LENGTH} characters`);
     }
 
     const cachedResult = parseText(text);
 
-    if (cachedResult !== UNABLE_TO_PARSE) {
-        // Copy so that callers (and the data augmentation below) can't modify the cached value
-        const result = deepCopy(cachedResult);
-        if (augmentWithData) {
-            if (result.components) {
-                result.components.forEach(component => component.data = getData(component));
-            } else {
-                result.data = getData(result);
-            }
-        }
-        return result;
+    if (cachedResult.error) {
+        throw new ParseError(text, cachedResult.error.position, [...cachedResult.error.expected]);
     }
+
+    // Copy so that callers (and the data augmentation below) can't modify the cached value
+    const result = deepCopy(cachedResult.value);
+    if (augmentWithData) {
+        if (result.components) {
+            result.components.forEach(component => component.data = getData(component));
+        } else {
+            result.data = getData(result);
+        }
+    }
+    return result;
 }
 
 exports.parse = parse;
+exports.ParseError = ParseError;

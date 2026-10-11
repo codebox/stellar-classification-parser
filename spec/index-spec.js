@@ -1,7 +1,8 @@
 describe("Classifier", function() {
     "use strict";
 
-    const parse = require('../index').parse;
+    const parse = require('../index').parse,
+        ParseError = require('../index').ParseError;
 
     function theText(txt) {
         return {
@@ -9,7 +10,7 @@ describe("Classifier", function() {
                 expect(parse(txt)).toEqual(expectedResult);
             },
             cannotBeParsed() {
-                expect(parse(txt)).not.toBeTruthy();
+                expect(() => parse(txt)).toThrowError(ParseError);
             }
         };
     }
@@ -1645,8 +1646,8 @@ describe("Classifier", function() {
         });
 
         it("cannot appear on their own", () => {
-            expect(parse('?')).toBeUndefined();
-            expect(parse(':')).toBeUndefined();
+            theText('?').cannotBeParsed();
+            theText(':').cannotBeParsed();
         });
     });
 
@@ -1706,9 +1707,9 @@ describe("Classifier", function() {
         });
 
         it("must have a component on each side of every +", () => {
-            expect(parse('F5V+')).toBeUndefined();
-            expect(parse('+F5V')).toBeUndefined();
-            expect(parse('F5V++K0III')).toBeUndefined();
+            theText('F5V+').cannotBeParsed();
+            theText('+F5V').cannotBeParsed();
+            theText('F5V++K0III').cannotBeParsed();
         });
 
         it("have data added to each component", () => {
@@ -1732,32 +1733,77 @@ describe("Classifier", function() {
     });
 
     describe("invalid input", function() {
-        it("non-string values cannot be parsed", () => {
+        it("non-string values throw a TypeError", () => {
             [undefined, null, 5, {}, [], true].forEach(value => {
-                expect(() => parse(value)).not.toThrow();
-                expect(parse(value)).toBeUndefined();
+                expect(() => parse(value)).toThrowError(TypeError);
             });
         });
 
         it("empty string cannot be parsed", () => theText("").cannotBeParsed());
 
         it("very long strings cannot be parsed", () => {
-            const text = 'G' + 'e'.repeat(10000);
-            expect(() => parse(text)).not.toThrow();
-            expect(parse(text)).toBeUndefined();
+            expect(() => parse('G' + 'e'.repeat(10000))).toThrowError(ParseError, 'Input is longer than the maximum of 100 characters');
         });
 
         it("strings up to the maximum length can be parsed", () => {
             expect(parse('G' + 'e'.repeat(99)).peculiarities.details.length).toEqual(99);
-            expect(parse('G' + 'e'.repeat(100))).toBeUndefined();
+            theText('G' + 'e'.repeat(100)).cannotBeParsed();
+        });
+    });
+
+    describe("parse errors", function() {
+        function errorFor(text) {
+            try {
+                parse(text);
+            } catch (e) {
+                return e;
+            }
+            fail(`Expected '${text}' not to parse`);
+        }
+
+        it("are ParseErrors", () => {
+            const error = errorFor('G5X');
+            expect(error instanceof ParseError).toBe(true);
+            expect(error instanceof Error).toBe(true);
+            expect(error.name).toEqual('ParseError');
+        });
+
+        it("report the input and the position of the first unexpected character", () => {
+            const error = errorFor('G5X');
+            expect(error.input).toEqual('G5X');
+            expect(error.position).toEqual(2);
+            expect(error.message).toEqual("Unexpected 'X' at position 2 in 'G5X'");
+        });
+
+        it("report what was expected at that position", () => {
+            const expected = errorFor('S5,0').expected;
+            expect(expected).toEqual(jasmine.arrayContaining(['1', '9']));
+            expect(expected).not.toContain('0');
+        });
+
+        it("report incomplete input", () => {
+            const error = errorFor('A5-');
+            expect(error.position).toEqual(3);
+            expect(error.message).toEqual("Unexpected end of input in 'A5-'");
+            expect(error.expected).toEqual(jasmine.arrayContaining(['A', '6']));
+        });
+
+        it("report the furthest point reached", () => {
+            expect(errorFor('F2.55').position).toEqual(4);
+            expect(errorFor('F5V+K0IIIx').position).toEqual(9);
+        });
+
+        it("are reported every time for the same input", () => {
+            expect(errorFor('G5X').position).toEqual(2);
+            expect(errorFor('G5X').position).toEqual(2);
         });
     });
 
     describe("caching", function() {
         it("an unparseable input does not affect a different valid input", () => {
-            expect(parse('B7V_true')).toBeUndefined();
+            theText('B7V_true').cannotBeParsed();
             expect(parse('B7V', true)).toBeTruthy();
-            expect(parse('B7V_undefined')).toBeUndefined();
+            theText('B7V_undefined').cannotBeParsed();
             expect(parse('B7V')).toBeTruthy();
         });
 
