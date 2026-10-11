@@ -281,6 +281,27 @@ describe("Classifier", function() {
         it("sdG5III-IV is invalid", () => theText("sdG5III-IV").cannotBeParsed());
     });
 
+    describe("reversed ranges", function() {
+        it("class ranges are reported hottest first", () => {
+            const result = parse('K0-G8');
+            expect(result.class.text).toEqual('K0-G8');
+            expect(result.class.range).toEqual({from : {letter : 'G', number : 8}, to : {letter : 'K', number : 0}});
+            expect(parse('A5-3').class.range).toEqual(parse('A3-5').class.range);
+            expect(parse('WN7-5').class.range).toEqual({from : {letter : 'WN', number : 5}, to : {letter : 'WN', number : 7}});
+        });
+
+        it("luminosity ranges are reported most luminous first", () => {
+            const luminosity = parse('G5V-III').luminosity;
+            expect(luminosity.text).toEqual('V-III');
+            expect([luminosity.range.from.luminosityClass, luminosity.range.to.luminosityClass]).toEqual(['III', 'V']);
+            expect(parse('G5Ib-a').luminosity.range.from.luminosityClass).toEqual('Ia');
+        });
+
+        it("give the same data as forward ranges", () => {
+            expect(parse('K0-G8V-III', true).data).toEqual(parse('G8-K0III-V', true).data);
+        });
+    });
+
     describe("handles more luminosity notation", function() {
         it("c prefix is a supergiant", () => expect(parse('cF8').luminosity).toEqual({
             text : 'c',

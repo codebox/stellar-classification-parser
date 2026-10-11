@@ -57,7 +57,7 @@ A classification for a single star produces an object with up to three parts, `c
 `text` is the class part of the code. Exactly one of the following is present:
 
 * `value` - a single class, e.g. `G5`
-* `range` - a range of classes with `from` and `to`, e.g. `A3-5` or `A3-F2`
+* `range` - a range of classes with `from` and `to`, e.g. `A3-5` or `A3-F2`. Ranges are always reported hottest first, so `K0-G8` has `from` G8 and `to` K0
 * `choice` - a list of alternative classes, e.g. `A3/5` or `A3/F2`
 * `combination` - a list of classes that share a luminosity, e.g. `A5+A6V`
 
@@ -72,7 +72,7 @@ Each class has a `letter` and, if one was given, a `number`. Some types of star 
 If the class was marked as uncertain (e.g. `G5:`) then `uncertain` is `true`.
 
 ### luminosity
-`text` is the luminosity part of the code, and exactly one of `value`, `range` or `choice` is present, as for `class`. Each luminosity has a `luminosityClass` (e.g. `III`) and a `description` (e.g. `Giant`). A luminosity prefix such as `sd` is converted into the equivalent luminosity class. If the luminosity was marked as uncertain (e.g. `G5V?`) then `uncertain` is `true`.
+`text` is the luminosity part of the code, and exactly one of `value`, `range` or `choice` is present, as for `class`. Ranges are reported most luminous first. Each luminosity has a `luminosityClass` (e.g. `III`) and a `description` (e.g. `Giant`). A luminosity prefix such as `sd` is converted into the equivalent luminosity class. If the luminosity was marked as uncertain (e.g. `G5V?`) then `uncertain` is `true`.
 
 ### peculiarities
 `details` lists each peculiarity code in the order it appears, with a `description`. A code followed by `:` or `?` has `uncertain : true`, and a code or element in brackets, such as `(n)` or `(Sr)`, has `weak : true`. A strength index such as `Fe-0.5` has a numeric `value`. `flags` summarises which peculiarities are present, with element codes under `flags.elements`, and strength indices and their values under `flags.indices` (e.g. `{ iron : -0.5 }`). `text` is a normalised version of the peculiarities, with one space between each code.

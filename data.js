@@ -79,6 +79,23 @@ function average(dataObjects, weights = dataObjects.map(() => 1)) {
     return result;
 }
 
+// Compares two classes by position in the spectral sequence, hottest first. Classes that can't be compared (eg WN and C) are treated as equal.
+function compareClasses(class1, class2) {
+    const position = clazz => clazz.letter === class1.letter && clazz.letter === class2.letter ? (clazz.number || 0) :
+        SPECTRAL_SEQUENCE.includes(clazz.letter) ? SPECTRAL_SEQUENCE.indexOf(clazz.letter) * 10 + (clazz.number || 0) : NaN,
+        difference = position(class1) - position(class2);
+
+    return isNaN(difference) ? 0 : difference;
+}
+
+// Compares two luminosity classes, most luminous first
+function compareLuminosities(luminosity1, luminosity2) {
+    const rank = luminosity => (LUMINOSITY_RANKS[luminosity.replace(LUMINOSITY_WITH_MODIFIER_REGEX, '$1')] || [NaN])[0],
+        difference = rank(luminosity1) - rank(luminosity2);
+
+    return isNaN(difference) ? 0 : difference;
+}
+
 // Returns the classes from 'from' to 'to' inclusive, including each whole-numbered subclass between them, eg B8-A1
 // gives B8, B9, A0 and A1. Classes outside the O-M sequence (eg WN) are only expanded if both ends have the same letter.
 function getClassesInRange(from, to) {
@@ -173,6 +190,8 @@ function lookupClass(letter, number, luminosity) {
 exports.NO_INFO = NO_INFO;
 exports.average = average;
 exports.getClassesInRange = getClassesInRange;
+exports.compareClasses = compareClasses;
+exports.compareLuminosities = compareLuminosities;
 exports.getLuminositiesInRange = getLuminositiesInRange;
 exports.lookup = (letter, number, luminosity) => {
     if (number === undefined || Number.isInteger(number)) {

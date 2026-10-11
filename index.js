@@ -3,7 +3,7 @@
 const fs = require('fs'),
     tree = require('./tree').tree,
     dataLookup = require('./data').lookup,
-    {NO_INFO, average, getClassesInRange, getLuminositiesInRange} = require('./data'),
+    {NO_INFO, average, getClassesInRange, getLuminositiesInRange, compareClasses, compareLuminosities} = require('./data'),
     grammarText = fs.readFileSync(__dirname + '/grammar.txt').toString(),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
@@ -334,6 +334,14 @@ function populateClassDetails(tree, result) {
                     to: classes[1]
                 };
             }
+
+            // Ranges are always reported hottest first, so a range written backwards such as K0-G8 becomes G8 to K0
+            if (compareClasses(classDetails.range.from, classDetails.range.to) > 0) {
+                classDetails.range = {
+                    from : classDetails.range.to,
+                    to : classDetails.range.from
+                };
+            }
         } else if (isClassChoice()) {
             const classChoice = tree.findOnly('CLASS_CHOICE'),
                 classCount = classes.length;
@@ -645,9 +653,11 @@ function populateLuminosityDetails(tree, result) {
         if (isLuminosityRange()) {
             assert(luminosities.length === 2);
 
+            // Ranges are always reported most luminous first, so V-III becomes III to V
+            const [from, to] = compareLuminosities(luminosities[0], luminosities[1]) > 0 ? [luminosities[1], luminosities[0]] : luminosities;
             luminosityDetails.range = {
-                from : buildLuminosity(luminosities[0]),
-                to : buildLuminosity(luminosities[1])
+                from : buildLuminosity(from),
+                to : buildLuminosity(to)
             };
 
         } else if (isLuminosityChoice()) {
