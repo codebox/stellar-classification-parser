@@ -1378,6 +1378,54 @@ describe("Classifier", function() {
                 expect(data).toEqual({})
             });
 
+            describe("luminosity classes without their own rows in the data", () => {
+                const G5_IA0_DATA = {
+                        mass: 12.5,
+                        luminosityRelative: 1070000,
+                        radiusRelative: 1840,
+                        temperature: 4400,
+                        colourIndexBv: 1.13,
+                        absoluteMagnitude: -9.5,
+                        bolometricCorrection: -0.83,
+                        bolometricMagnitude: -10.33,
+                        colour: {
+                            r: 255,
+                            g: 230,
+                            b: 183
+                        }
+                    },
+                    G5_IA_IB_AVERAGE_DATA = {
+                        mass: 5.5,
+                        luminosityRelative: 98900,
+                        radiusRelative: 479,
+                        temperature: 4400,
+                        colourIndexBv: 1.13,
+                        absoluteMagnitude: -6.1,
+                        bolometricCorrection: -0.83,
+                        bolometricMagnitude: -6.93,
+                        colour: {
+                            r: 255,
+                            g: 230,
+                            b: 183
+                        }
+                    };
+
+                it("0 uses Ia0", () => expect(parse('G50', true).data).toEqual(G5_IA0_DATA));
+                it("Ia+ uses Ia0", () => expect(parse('G5Ia+', true).data).toEqual(G5_IA0_DATA));
+                it("I uses the average of Ia and Ib", () => expect(parse('G5I', true).data).toEqual(G5_IA_IB_AVERAGE_DATA));
+                it("Iab uses the average of Ia and Ib", () => expect(parse('G5Iab', true).data).toEqual(G5_IA_IB_AVERAGE_DATA));
+                it("a and b sub-divisions use the main luminosity class", () => {
+                    const g5IIIData = parse('G5III', true).data;
+                    expect(g5IIIData.mass).toEqual(2);
+                    expect(parse('G5IIIa', true).data).toEqual(g5IIIData);
+                    expect(parse('G5IIIb', true).data).toEqual(g5IIIData);
+                });
+                it("I is counted once in a luminosity range", () => {
+                    expect(parse('G5I-III', true).data.mass).toEqual(3.75);
+                });
+                it("VII has no data", () => expect(parse('G5VII', true).data).toEqual({}));
+            });
+
             describe("white dwarfs", () => {
                 const DA4_DATA = {
                     mass: 0.6,

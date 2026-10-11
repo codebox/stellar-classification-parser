@@ -42,10 +42,39 @@ lineObjects.forEach(obj => {
     numberObj[luminosityClass] = objClone;
 });
 
-const NO_INFO = Object.freeze({});
+const NO_INFO = Object.freeze({}),
+    // Luminosity classes that the parser can return, but which don't appear directly in data.txt
+    LUMINOSITY_ALIASES = {
+        '0' : ['Ia0'],
+        'Ia+' : ['Ia0'],
+        'I' : ['Ia', 'Ib'],
+        'Iab' : ['Ia', 'Ib']
+    },
+    LUMINOSITY_WITH_MODIFIER_REGEX = /^(II|III|IV|V|VI|VII)[ab]$/;
 
-exports.NO_INFO = NO_INFO;
-exports.lookup = (letter, number, luminosity) => {
+function average(dataObjects) {
+    const result = {};
+
+    Object.keys(dataObjects[0]).forEach(key => {
+        if (typeof dataObjects[0][key] === 'object') {
+            result[key] = average(dataObjects.map(dataObject => dataObject[key]));
+        } else {
+            result[key] = dataObjects.reduce((a, dataObject) => a + dataObject[key], 0) / dataObjects.length;
+        }
+    });
+
+    return result;
+}
+
+function getLuminosityKeys(luminosity) {
+    if (LUMINOSITY_ALIASES[luminosity]) {
+        return LUMINOSITY_ALIASES[luminosity];
+    }
+    // data.txt doesn't distinguish the 'a' and 'b' sub-divisions, eg 'IIIa' uses the data for 'III'
+    return [luminosity.replace(LUMINOSITY_WITH_MODIFIER_REGEX, '$1')];
+}
+
+function lookupLuminosity(letter, number, luminosity) {
     const DEFAULT_NUMBER = '5',
         IS_WHITE_DWARF_REGEX = /^D.$/,
         NON_WHITE_DWARF_DEFAULT_LUMINOSITY = 'V',
@@ -65,5 +94,13 @@ exports.lookup = (letter, number, luminosity) => {
     }
 
     return NO_INFO;
-};
+}
 
+exports.NO_INFO = NO_INFO;
+exports.lookup = (letter, number, luminosity) => {
+    const dataObjects = getLuminosityKeys(luminosity)
+        .map(luminosityKey => lookupLuminosity(letter, number, luminosityKey))
+        .filter(data => data !== NO_INFO);
+
+    return dataObjects.length ? average(dataObjects) : NO_INFO;
+};
