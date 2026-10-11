@@ -281,6 +281,41 @@ describe("Classifier", function() {
         it("sdG5III-IV is invalid", () => theText("sdG5III-IV").cannotBeParsed());
     });
 
+    describe("handles more luminosity notation", function() {
+        it("c prefix is a supergiant", () => expect(parse('cF8').luminosity).toEqual({
+            text : 'c',
+            value : {luminosityClass : 'I', description : 'Supergiant'}
+        }));
+        it("esd prefix is an extreme subdwarf", () => expect(parse('esdM3').luminosity).toEqual({
+            text : 'esd',
+            value : {luminosityClass : 'VI', description : 'Extreme Sub-Dwarf'}
+        }));
+        it("usd prefix is an ultra subdwarf", () => expect(parse('usdM5').luminosity).toEqual({
+            text : 'usd',
+            value : {luminosityClass : 'VI', description : 'Ultra Sub-Dwarf'}
+        }));
+        it("shorthand supergiant range", () => {
+            const luminosity = parse('G5Iab-b').luminosity;
+            expect(luminosity.text).toEqual('Iab-b');
+            expect(luminosity.range.from.luminosityClass).toEqual('Iab');
+            expect(luminosity.range.to.luminosityClass).toEqual('Ib');
+            expect(parse('B1Ia-ab').luminosity.range.to.luminosityClass).toEqual('Iab');
+            expect(parse('B0Ia0-a').luminosity.range.to.luminosityClass).toEqual('Ia');
+        });
+        it("shorthand choice", () => {
+            expect(parse('K0IIIa/b').luminosity.choice.map(l => l.luminosityClass)).toEqual(['IIIa', 'IIIb']);
+            expect(parse('B2Ia/ab').luminosity.choice.map(l => l.luminosityClass)).toEqual(['Ia', 'Iab']);
+        });
+        it("shorthand ranges give the same data as the full form", () => {
+            expect(parse('G5Iab-b', true).data).toEqual(parse('G5Iab-Ib', true).data);
+        });
+        it("supergiant shorthand is only allowed after a supergiant class", () => {
+            theText('G5III-ab').cannotBeParsed();
+            theText('G5III-a0').cannotBeParsed();
+            theText('G5Ia-c').cannotBeParsed();
+        });
+    });
+
     describe("handles multiple luminosities correctly", function() {
         it("with ranges", () => theText("G5II-III").isParsedToExactly({
             class : {

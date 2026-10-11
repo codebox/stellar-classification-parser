@@ -98,8 +98,8 @@ Among other things, the parser understands:
 * Alternative letter/number codes e.g. `A5/A6`
 * Combinations of letter/number codes e.g. `A5+A6`
 * Multiple stars that each have their own luminosity e.g. `F5V+K0III`
-* Luminosity prefixes (`sd`, `d`, `sg`, `g`) or suffixes (`I`, `Ia0`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
-* Luminosity suffix ranges and alternatives e.g. `O7V-VI` and `O7V/VI`
+* Luminosity prefixes (`sd`, `esd`, `usd`, `d`, `sg`, `g`, `c`) or suffixes (`I`, `Ia0`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
+* Luminosity suffix ranges and alternatives e.g. `O7V-VI` and `O7V/VI`, including shorthand such as `Iab-b` (Iab to Ib) or `IIIa/b` (IIIa or IIIb)
 * Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`, and element codes such as `Sr` or `HgMn`. Codes in brackets, such as `(n)` or `(e)`, indicate a weak feature
 * Strength indices for iron, CN, CH, barium, C2 and calcium e.g. `K1.5IIIFe-0.5` or `G8III CN+1 Ba2`
 * Uncertainty markers `:` or `?` after the class, luminosity, or any peculiarity code e.g. `G5:`, `G0V?` or `B2IVe:`

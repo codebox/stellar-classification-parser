@@ -38,12 +38,16 @@ const fs = require('fs'),
         'VIIa' : 'Luminous White-Dwarf',
         'VIIb' : 'Less Luminous White-Dwarf'
     },
-    LUMINOSITY_PREFIX_TRANSLATION = {
-        "sd" : "VI",
-        "d" : "V",
-        "sg" : "I",
-        "g" : "III"
+    LUMINOSITY_PREFIXES = {
+        'esd' : {luminosityClass : 'VI', description : 'Extreme Sub-Dwarf'},
+        'usd' : {luminosityClass : 'VI', description : 'Ultra Sub-Dwarf'},
+        'sd' : {luminosityClass : 'VI'},
+        'd' : {luminosityClass : 'V'},
+        'sg' : {luminosityClass : 'I'},
+        'g' : {luminosityClass : 'III'},
+        'c' : {luminosityClass : 'I'}
     },
+    LUMINOSITY_SHORTHAND_SUFFIX_REGEX = /(a0|a\+|ab|a|b)$/,
     SUFFIXES = {
         whiteDwarf : populateDuplicates({
             'P' : {
@@ -547,7 +551,18 @@ function populateLuminosityDetails(tree, result) {
         return !tree.findOptional('LUMINOSITY_CHOICE').empty;
     }
     function getLuminosityValues() {
-        return tree.find('LUMINOSITY').map(t => t.collectText());
+        const rangeOrChoice = isLuminosityRange() ? tree.findOnly('LUMINOSITY_RANGE') : isLuminosityChoice() ? tree.findOnly('LUMINOSITY_CHOICE') : null;
+        if (!rangeOrChoice) {
+            return [tree.findOnly('LUMINOSITY').collectText()];
+        }
+
+        const [first, , second] = rangeOrChoice.children(),
+            firstText = first.collectText(),
+            secondText = second.collectText(),
+            secondIsShorthand = /SHORTHAND$/.test(Object.keys(second.get())[0]);
+
+        // Shorthand such as Iab-b or IIIa/b, where the second value only gives the sub-division, so means Iab-Ib or IIIa/IIIb
+        return [firstText, secondIsShorthand ? firstText.replace(LUMINOSITY_SHORTHAND_SUFFIX_REGEX, '') + secondText : secondText];
     }
     function buildLuminosity(value) {
         return {
@@ -562,10 +577,14 @@ function populateLuminosityDetails(tree, result) {
     if (hasLuminosityPrefix()) {
         const luminosityDetails = result.luminosity = {},
             prefix = tree.findOnly('LUMINOSITY_PREFIX').get()[0],
-            value = LUMINOSITY_PREFIX_TRANSLATION[prefix];
+            prefixDetails = LUMINOSITY_PREFIXES[prefix],
+            value = buildLuminosity(prefixDetails.luminosityClass);
 
+        if (prefixDetails.description) {
+            value.description = prefixDetails.description;
+        }
         luminosityDetails.text = prefix;
-        luminosityDetails.value = buildLuminosity(value);
+        luminosityDetails.value = value;
 
     } else if (hasLuminositySuffix()) {
         const luminosityDetails = result.luminosity = {},
