@@ -1557,6 +1557,80 @@ describe("Classifier", function() {
         });
     });
 
+    describe("strength indices", function() {
+        it("are parsed with a negative value", () => theText("K1.5IIIFe-0.5").isParsedToExactly({
+            class : {
+                text : 'K1.5',
+                value : {
+                    letter : 'K',
+                    number : 1.5
+                }
+            },
+            luminosity : {
+                text : 'III',
+                value : {
+                    luminosityClass : 'III',
+                    description : 'Giant'
+                }
+            },
+            peculiarities : {
+                text : 'Fe-0.5',
+                flags : {
+                    indices : {
+                        iron : -0.5
+                    }
+                },
+                details : [{
+                    text : 'Fe-0.5',
+                    description : 'Strength index of Iron features: -0.5',
+                    value : -0.5
+                }]
+            }
+        }));
+
+        it("are parsed with a positive or unsigned value", () => {
+            expect(parse('K0III CN+1').peculiarities.flags.indices).toEqual({cyanogen : 1});
+            expect(parse('G5IIIBa2').peculiarities.flags.indices).toEqual({barium : 2});
+            expect(parse('K0III CH0.5').peculiarities.flags.indices).toEqual({methylidyne : 0.5});
+        });
+
+        it("cover iron, CN, CH, barium, C2 and calcium", () => {
+            expect(parse('K0III Fe-1 CN+1 CH-0.5 Ba3 C2 2 Ca-1').peculiarities.flags.indices).toEqual({
+                iron : -1,
+                cyanogen : 1,
+                methylidyne : -0.5,
+                barium : 3,
+                dicarbon : 2,
+                calcium : -1
+            });
+        });
+
+        it("can be combined with other peculiarities in order", () => {
+            const peculiarities = parse('G8III Fe-1 CN0.5 p').peculiarities;
+            expect(peculiarities.text).toEqual('Fe-1 CN0.5 p');
+            expect(peculiarities.details.map(d => d.text)).toEqual(['Fe-1', 'CN0.5', 'p']);
+        });
+
+        it("can be marked as uncertain", () => {
+            expect(parse('K0III Fe-1:').peculiarities.details[0].uncertain).toBe(true);
+        });
+
+        it("are not confused with element codes", () => {
+            expect(parse('K0IIIFe').peculiarities.flags).toEqual({elements : {iron : true}});
+        });
+
+        it("are not confused with a second star", () => {
+            const components = parse('G8IIIFe-1+K0V').components;
+            expect(components.length).toEqual(2);
+            expect(components[0].peculiarities.flags.indices).toEqual({iron : -1});
+        });
+
+        it("must have a valid value", () => {
+            theText('K0IIIFe-').cannotBeParsed();
+            theText('K0IIIFe-1.55').cannotBeParsed();
+        });
+    });
+
     describe("uncertainty markers", function() {
         it("? after the class marks the class as uncertain", () => {
             expect(parse('G5?').class).toEqual({

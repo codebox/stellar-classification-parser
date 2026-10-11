@@ -137,6 +137,15 @@ const fs = require('fs'),
             'wk' : 'w'
         })
     },
+    // Indices giving the strength of particular features relative to normal, eg Fe-1 or CN+0.5
+    INDICES = {
+        'Fe' : {flagName : 'iron', description : 'Iron'},
+        'CN' : {flagName : 'cyanogen', description : 'CN (cyanogen)'},
+        'CH' : {flagName : 'methylidyne', description : 'CH (methylidyne)'},
+        'Ba' : {flagName : 'barium', description : 'Barium'},
+        'C2' : {flagName : 'dicarbon', description : 'C2 (Swan band)'},
+        'Ca' : {flagName : 'calcium', description : 'Calcium'}
+    },
     WHITE_DWARF_SUBTYPES = {
         'A' : 'Hydrogen lines',
         'B' : 'Neutral helium lines',
@@ -542,9 +551,17 @@ function populatePeculiarities(tree, result) {
         while (!suffixesTree.empty) {
             const [suffix, uncertainties, remainingSuffixes] = suffixesTree.children(),
                 suffixValue = suffix.findOnly('SUFFIX'),
-                elementValue = suffixValue.findOptional('ELEMENT_VALUE');
+                elementValue = suffixValue.findOptional('ELEMENT_VALUE'),
+                index = suffixValue.findOptional('INDEX');
 
-            if (elementValue.empty) {
+            if (!index.empty) {
+                suffixes.push({
+                    index : index.findOnly('INDEX_NAME').get()[0],
+                    text : index.collectText(),
+                    value : Number(index.findOnly('INDEX_VALUE').collectText()),
+                    uncertainty : uncertainties.collectText()
+                });
+            } else if (elementValue.empty) {
                 suffixes.push({
                     text : suffixValue.get().join(' '),
                     uncertainty : uncertainties.collectText()
@@ -577,7 +594,18 @@ function populatePeculiarities(tree, result) {
     peculiarities.text = suffixes.map(suffix => {
         let details;
 
-        if (suffix.element) {
+        if (suffix.index) {
+            const indexDetails = INDICES[suffix.index];
+            assert(indexDetails, suffix.index);
+
+            (peculiarities.flags.indices || (peculiarities.flags.indices = {}))[indexDetails.flagName] = suffix.value;
+            details = {
+                text : suffix.text,
+                description : `Strength index of ${indexDetails.description} features: ${suffix.text.substr(suffix.index.length)}`,
+                value : suffix.value
+            };
+
+        } else if (suffix.element) {
             const elementDetails = ELEMENTS[suffix.element];
             assert(elementDetails, suffix.element);
 
