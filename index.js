@@ -8,7 +8,8 @@ const fs = require('fs'),
     START_SYMBOL = 'START',
     EPSILON = 'ε',
     UNABLE_TO_PARSE = 'nope',
-    cache = {},
+    MAX_CACHE_SIZE = 1000,
+    cache = new Map(),
     parser = require('top-down-parser').buildParser(grammarText, START_SYMBOL, EPSILON),
     LUMINOSITY_DESCRIPTIONS = {
         '0' : 'Hypergiant',
@@ -673,22 +674,36 @@ function getData(result) {
     return mergeDataObjects(dataObjects, n => Number(n.toPrecision(4)));
 }
 
-function parse(text, augmentWithData) {
-    let result = cache[`${text}_${augmentWithData}`];
-
-    if (!result) {
-        const parseResult = parser.parse(text);
-
-        if (parseResult && !parseResult.remainder) {
-            const treeWrapper = tree(parseResult.tree);
-            result = transformParseTree(treeWrapper);
-        } else {
-            result = UNABLE_TO_PARSE;
-        }
-        cache[text] = result
+function parseText(text) {
+    if (cache.has(text)) {
+        return cache.get(text);
     }
 
-    if (result !== UNABLE_TO_PARSE) {
+    const parseResult = parser.parse(text);
+    let result;
+
+    if (parseResult && !parseResult.remainder) {
+        const treeWrapper = tree(parseResult.tree);
+        result = transformParseTree(treeWrapper);
+    } else {
+        result = UNABLE_TO_PARSE;
+    }
+
+    if (cache.size >= MAX_CACHE_SIZE) {
+        // Map iterates in insertion order, so this evicts the oldest entry
+        cache.delete(cache.keys().next().value);
+    }
+    cache.set(text, result);
+
+    return result;
+}
+
+function parse(text, augmentWithData) {
+    const cachedResult = parseText(text);
+
+    if (cachedResult !== UNABLE_TO_PARSE) {
+        // Copy so that callers (and the data augmentation below) can't modify the cached value
+        const result = deepCopy(cachedResult);
         if (augmentWithData) {
             result.data = getData(result);
         }

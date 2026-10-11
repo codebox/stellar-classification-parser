@@ -1328,4 +1328,28 @@ describe("Classifier", function() {
 
         });
     });
+
+    describe("caching", function() {
+        it("an unparseable input does not affect a different valid input", () => {
+            expect(parse('B7V_true')).toBeUndefined();
+            expect(parse('B7V', true)).toBeTruthy();
+            expect(parse('B7V_undefined')).toBeUndefined();
+            expect(parse('B7V')).toBeTruthy();
+        });
+
+        it("data is only included when requested", () => {
+            expect(parse('B8V', true).data).toBeDefined();
+            expect(parse('B8V').data).toBeUndefined();
+        });
+
+        it("modifying a returned result does not affect later results", () => {
+            const first = parse('B9V');
+            first.class.text = 'modified';
+            delete first.luminosity;
+
+            const second = parse('B9V');
+            expect(second.class.text).toEqual('B9');
+            expect(second.luminosity.text).toEqual('V');
+        });
+    });
 });
