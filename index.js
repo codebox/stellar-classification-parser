@@ -14,7 +14,6 @@ const fs = require('fs'),
     cache = new Map(),
     parser = require('./parser').buildParser(grammarText, START_SYMBOL, EPSILON),
     LUMINOSITY_DESCRIPTIONS = {
-        '0' : 'Hypergiant',
         'Ia0' : 'Hypergiant',
         'Ia+' : 'Hypergiant',
         'Ia' : 'Luminous Supergiant',

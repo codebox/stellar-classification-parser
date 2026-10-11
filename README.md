@@ -40,7 +40,7 @@ Among other things, the parser understands:
 * Alternative letter/number codes e.g. `A5/A6`
 * Combinations of letter/number codes e.g. `A5+A6`
 * Multiple stars that each have their own luminosity e.g. `F5V+K0III`, which are returned as a `components` list with one parse result per star (when data is requested, each component gets its own `data`). A class without a luminosity is combined with the class that follows it, so `A5+A6V` is still a single result with a shared luminosity
-* Luminosity prefixes (`sd`, `d`, `sg`, `g`) or suffixes (`0`, `I`, `Ia0`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
+* Luminosity prefixes (`sd`, `d`, `sg`, `g`) or suffixes (`I`, `Ia0`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
 * Luminosity suffix ranges and alternatives e.g. `O7V-VI` and `O7V/VI`
 * Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`
 * Uncertainty markers `:` or `?` after the class, luminosity, or any peculiarity code e.g. `G5:`, `G0V?` or `B2IVe:`. An uncertain peculiarity has `uncertain: true` in its `details` entry

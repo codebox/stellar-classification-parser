@@ -237,7 +237,9 @@ describe("Classifier", function() {
                 }
             };
         }
-        it("G50 is valid", () => theText("G50").isParsedToExactly(resultWithLuminosity('0', 'Hypergiant')));
+        it("G50 is invalid (use Ia0 for hypergiants)", () => theText("G50").cannotBeParsed());
+        it("G10 is invalid", () => theText("G10").cannotBeParsed());
+        it("M10 is invalid", () => theText("M10").cannotBeParsed());
         it("G5I is valid", () => theText("G5I").isParsedToExactly(resultWithLuminosity('I', 'Supergiant')));
         it("G5Ia0 is valid", () => theText("G5Ia0").isParsedToExactly(resultWithLuminosity('Ia0', 'Hypergiant')));
         it("G5Ia+ is valid", () => theText("G5Ia+").isParsedToExactly(resultWithLuminosity('Ia+', 'Hypergiant')));
@@ -1448,9 +1450,8 @@ describe("Classifier", function() {
                         }
                     };
 
-                it("0 uses Ia0", () => expect(parse('G50', true).data).toEqual(G5_IA0_DATA));
                 it("Ia+ uses Ia0", () => expect(parse('G5Ia+', true).data).toEqual(G5_IA0_DATA));
-                it("Ia0 gives the same data as 0 and Ia+", () => expect(parse('G5Ia0', true).data).toEqual(G5_IA0_DATA));
+                it("Ia0 gives the same data as Ia+", () => expect(parse('G5Ia0', true).data).toEqual(G5_IA0_DATA));
                 it("I uses the average of Ia and Ib", () => expect(parse('G5I', true).data).toEqual(G5_IA_IB_AVERAGE_DATA));
                 it("Iab uses the average of Ia and Ib", () => expect(parse('G5Iab', true).data).toEqual(G5_IA_IB_AVERAGE_DATA));
                 it("a and b sub-divisions use the main luminosity class", () => {

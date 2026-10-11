@@ -45,7 +45,6 @@ lineObjects.forEach(obj => {
 const NO_INFO = Object.freeze({}),
     // Luminosity classes that the parser can return, but which don't appear directly in data.txt
     LUMINOSITY_ALIASES = {
-        '0' : ['Ia0'],
         'Ia+' : ['Ia0'],
         'I' : ['Ia', 'Ib'],
         'Iab' : ['Ia', 'Ib']
