@@ -917,7 +917,9 @@ describe("Classifier", function() {
                         value: {
                             letter: 'S',
                             number : 5,
-                            ZrOTiORatio : ratio
+                            abundance : {
+                                ZrOTiORatio : ratio
+                            }
                         }
                     }
                 };
@@ -934,7 +936,9 @@ describe("Classifier", function() {
                         value: {
                             letter: 'S',
                             number : 5,
-                            CORatio : ratio
+                            abundance : {
+                                CORatio : ratio
+                            }
                         }
                     }
                 };
@@ -951,7 +955,9 @@ describe("Classifier", function() {
                         value: {
                             letter: 'S',
                             number : 5,
-                            ZrOStrength : strength
+                            abundance : {
+                                ZrOStrength : strength
+                            }
                         }
                     }
                 };
@@ -972,13 +978,22 @@ describe("Classifier", function() {
             }
         }));
         describe('sub-types', () => {
+            const DESCRIPTIONS = {
+                A : 'Hydrogen lines',
+                B : 'Neutral helium lines',
+                O : 'Ionised helium lines',
+                Q : 'Carbon features',
+                Z : 'Metal lines',
+                C : 'No strong lines (continuous spectrum)',
+                X : 'Unclassifiable spectrum'
+            };
             function dwarfWithSubType(st) {
                 return {
                     class : {
                         text: 'D' + st,
                         value: {
                             letter: 'D',
-                            dwarfType : st
+                            subtypes : st.split('').map(code => ({code, description : DESCRIPTIONS[code]}))
                         }
                     }
                 };
@@ -1002,7 +1017,7 @@ describe("Classifier", function() {
                     text: 'D5',
                     value: {
                         letter: 'D',
-                        dwarfTemperature : 5
+                        number : 5
                     }
                 }
             }));
@@ -1011,8 +1026,8 @@ describe("Classifier", function() {
                     text: 'DA0',
                     value: {
                         letter: 'D',
-                        dwarfType : 'A',
-                        dwarfTemperature : 0
+                        subtypes : [{code : 'A', description : 'Hydrogen lines'}],
+                        number : 0
                     }
                 }
             }));
@@ -1021,8 +1036,8 @@ describe("Classifier", function() {
                     text: 'DA10',
                     value: {
                         letter: 'D',
-                        dwarfType : 'A',
-                        dwarfTemperature : 10
+                        subtypes : [{code : 'A', description : 'Hydrogen lines'}],
+                        number : 10
                     }
                 }
             }));
@@ -1031,8 +1046,8 @@ describe("Classifier", function() {
                     text: 'DAB1.5',
                     value: {
                         letter: 'D',
-                        dwarfType : 'AB',
-                        dwarfTemperature : 1.5
+                        subtypes : [{code : 'A', description : 'Hydrogen lines'}, {code : 'B', description : 'Neutral helium lines'}],
+                        number : 1.5
                     }
                 }
             }));
@@ -1137,7 +1152,7 @@ describe("Classifier", function() {
                     }
                 },
                 peculiarities : {
-                    text : 'HVPEC',
+                    text : 'H V PEC',
                     flags : {
                         magneticUnpolarized : true,
                         variable : true,
@@ -1158,21 +1173,23 @@ describe("Classifier", function() {
         });
     });
     describe('carbon stars', () => {
-        function carbonStarOfType(type) {
+        function carbonStarOfType(code, description) {
             return {
                 class : {
-                    text: type,
+                    text: 'C-' + code,
                     value: {
-                        letter: type
+                        letter: 'C',
+                        subtypes : [{code, description}]
                     }
                 }
             };
         }
-        it('C-R',  () => theText("C-R").isParsedToExactly(carbonStarOfType('C-R')));
-        it('C-N',  () => theText("C-N").isParsedToExactly(carbonStarOfType('C-N')));
-        it('C-J',  () => theText("C-J").isParsedToExactly(carbonStarOfType('C-J')));
-        it('C-H',  () => theText("C-H").isParsedToExactly(carbonStarOfType('C-H')));
-        it('C-Hd', () => theText("C-Hd").isParsedToExactly(carbonStarOfType('C-Hd')));
+        it('C-R',  () => theText("C-R").isParsedToExactly(carbonStarOfType('R', 'Warmer carbon star (formerly class R)')));
+        it('C-N',  () => theText("C-N").isParsedToExactly(carbonStarOfType('N', 'Cooler carbon star (formerly class N)')));
+        it('C-J',  () => theText("C-J").isParsedToExactly(carbonStarOfType('J', 'Carbon star with strong carbon-13 features')));
+        it('C-H',  () => theText("C-H").isParsedToExactly(carbonStarOfType('H', 'CH star (metal-poor carbon star)')));
+        it('C-Hd', () => theText("C-Hd").isParsedToExactly(carbonStarOfType('Hd', 'Hydrogen-deficient carbon star')));
+        it('have no data', () => expect(parse('C-R', true).data).toEqual({}));
 
         it('C-X',    () => theText("C-X").cannotBeParsed());
         it('C-RI',   () => theText("C-RI").cannotBeParsed());

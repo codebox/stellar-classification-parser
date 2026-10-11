@@ -138,6 +138,22 @@ const fs = require('fs'),
             'wk' : 'w'
         })
     },
+    WHITE_DWARF_SUBTYPES = {
+        'A' : 'Hydrogen lines',
+        'B' : 'Neutral helium lines',
+        'O' : 'Ionised helium lines',
+        'Q' : 'Carbon features',
+        'Z' : 'Metal lines',
+        'C' : 'No strong lines (continuous spectrum)',
+        'X' : 'Unclassifiable spectrum'
+    },
+    CARBON_STAR_SUBTYPES = {
+        'R' : 'Warmer carbon star (formerly class R)',
+        'N' : 'Cooler carbon star (formerly class N)',
+        'J' : 'Carbon star with strong carbon-13 features',
+        'H' : 'CH star (metal-poor carbon star)',
+        'Hd' : 'Hydrogen-deficient carbon star'
+    },
     ELEMENTS = {
         'Sr' : {
             flagName : 'strontium',
@@ -335,19 +351,22 @@ function populateSTypeClassDetails(tree, result) {
             result.class.value.number = baseNumber;
         }
 
-        const zrOTiORatio = getZrOTiORatio();
+        const abundance = {},
+            zrOTiORatio = getZrOTiORatio(),
+            cORatio = getCORatio(),
+            zrOStrength = getZrOStrength();
+
         if (zrOTiORatio !== undefined) {
-            result.class.value.ZrOTiORatio = zrOTiORatio;
+            abundance.ZrOTiORatio = zrOTiORatio;
         }
-
-        const cORatio = getCORatio();
         if (cORatio !== undefined) {
-            result.class.value.CORatio = cORatio;
+            abundance.CORatio = cORatio;
         }
-
-        const zrOStrength = getZrOStrength();
         if (zrOStrength !== undefined) {
-            result.class.value.ZrOStrength = zrOStrength;
+            abundance.ZrOStrength = zrOStrength;
+        }
+        if (Object.keys(abundance).length) {
+            result.class.value.abundance = abundance;
         }
     }
 }
@@ -375,22 +394,26 @@ function populateWhiteDwarfDetails(tree, result) {
                 letter : 'D'
             }
         };
-        classDetails.text = 'D' + tree.findOptional('DWARF_TYPES').collectText() + tree.findOptional('DWARF_TEMPERATURE').collectText();;
+        classDetails.text = 'D' + tree.findOptional('DWARF_TYPES').collectText() + tree.findOptional('DWARF_TEMPERATURE').collectText();
 
-        const dwarfType = getType();
-        if (dwarfType) {
-            result.class.value.dwarfType = dwarfType;
-        }
-
+        // For white dwarfs the number is the temperature index, 50400/T
         const temperature = getTemperature();
         if (temperature !== undefined) {
-            result.class.value.dwarfTemperature = temperature;
+            result.class.value.number = temperature;
+        }
+
+        const subtypes = getType().split('');
+        if (subtypes.length) {
+            result.class.value.subtypes = subtypes.map(code => ({
+                code,
+                description : WHITE_DWARF_SUBTYPES[code]
+            }));
         }
 
         const peculiarities = getPeculiarities();
         if (peculiarities.length) {
             result.peculiarities = {
-                text : tree.findOnly('DWARF_PECULIARITIES').collectText(),
+                text : peculiarities.map(p => p[0]).join(' '),
                 flags : {},
                 details : []
             };
@@ -414,12 +437,17 @@ function populateCarbonStarDetails(tree, result) {
     }
 
     if (isCarbonStar()) {
-        const type = tree.findOnly('CARBON_STAR').collectText();
+        const type = tree.findOnly('CARBON_STAR').collectText(),
+            subtype = type.replace('C-', '');
 
         result.class = {
             text : type,
             value : {
-                letter : type
+                letter : 'C',
+                subtypes : [{
+                    code : subtype,
+                    description : CARBON_STAR_SUBTYPES[subtype]
+                }]
             }
         };
     }
@@ -616,12 +644,15 @@ function getData(result) {
 
         if (value.letter === 'D') {
             // White dwarf data is keyed by sub-type (eg 'DA') and temperature, use each sub-type that is present
-            (value.dwarfType || '').split('').forEach(dwarfType => {
+            (value.subtypes || []).forEach(subtype => {
                 classes.push({
-                    letter : value.letter + dwarfType,
-                    number : value.dwarfTemperature
+                    letter : value.letter + subtype.code,
+                    number : value.number
                 });
             });
+
+        } else if (value.letter === 'C') {
+            // data.txt has no data for the carbon star sub-types
 
         } else {
             classes.push(value);
