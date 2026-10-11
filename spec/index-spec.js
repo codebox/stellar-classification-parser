@@ -1378,6 +1378,62 @@ describe("Classifier", function() {
                 expect(data).toEqual({})
             });
 
+            describe("white dwarfs", () => {
+                const DA4_DATA = {
+                    mass: 0.6,
+                    luminosityRelative: 0.00182,
+                    radiusRelative: 0.00922,
+                    temperature: 12600,
+                    colourIndexBv: -0.13,
+                    absoluteMagnitude: 12.5,
+                    bolometricCorrection: -0.9,
+                    bolometricMagnitude: 11.6,
+                    colour: {
+                        r: 192,
+                        g: 207,
+                        b: 255
+                    }
+                };
+
+                it("sub-type and temperature", () => {
+                    expect(parse('DA4', true).data).toEqual(DA4_DATA);
+                });
+
+                it("sub-type, temperature and peculiarity", () => {
+                    expect(parse('DA4V', true).data).toEqual(DA4_DATA);
+                });
+
+                it("multiple sub-types", () => {
+                    expect(parse('DAO4', true).data).toEqual(DA4_DATA);
+                });
+
+                it("sub-type only", () => {
+                    expect(parse('DA', true).data).toEqual({
+                        mass: 0.5,
+                        luminosityRelative: 0.000693,
+                        radiusRelative: 0.0089,
+                        temperature: 10080,
+                        colourIndexBv: -0.07,
+                        absoluteMagnitude: 13.1,
+                        bolometricCorrection: -0.45,
+                        bolometricMagnitude: 12.65,
+                        colour: {
+                            r: 207,
+                            g: 218,
+                            b: 255
+                        }
+                    });
+                });
+
+                it("no sub-type", () => {
+                    expect(parse('D4', true).data).toEqual({});
+                });
+
+                it("sub-type with no data", () => {
+                    expect(parse('DX4', true).data).toEqual({});
+                });
+            });
+
         });
     });
 

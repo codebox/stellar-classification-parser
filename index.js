@@ -619,7 +619,20 @@ function getData(result) {
         luminosities = [];
 
     if (result.class.value) {
-        classes.push(result.class.value);
+        const value = result.class.value;
+
+        if (value.letter === 'D') {
+            // White dwarf data is keyed by sub-type (eg 'DA') and temperature, use each sub-type that is present
+            (value.dwarfType || '').split('').forEach(dwarfType => {
+                classes.push({
+                    letter : value.letter + dwarfType,
+                    number : value.dwarfTemperature
+                });
+            });
+
+        } else {
+            classes.push(value);
+        }
 
     } else if (result.class.range) {
         const range = result.class.range;
