@@ -1542,7 +1542,7 @@ describe("Classifier", function() {
                 });
                 it("are interpolated for white dwarf temperatures", () => {
                     const data = parse('DA4.5', true).data;
-                    expect(data.mass).toEqual(0.5477);
+                    expect(data.mass).toEqual(0.6);
                     expect(data.temperature).toEqual(11270);
                 });
                 it("are interpolated in ranges", () => {
@@ -1599,22 +1599,23 @@ describe("Classifier", function() {
                     // A0V is 9900K, which is a temperature index of 50400/9900 = 5.09, so is close to DA5
                     const data = parse('A0VII', true).data;
                     expect(data.temperature).toEqual(9914);
-                    expect(data.mass).toEqual(0.49);
+                    expect(data.mass).toEqual(0.6);
                     expect(parse('A0VIIa', true).data).toEqual(data);
                 });
                 it("VII has no data for classes cooler than the white dwarf data", () => expect(parse('K5VII', true).data).toEqual({}));
             });
 
             describe("white dwarfs", () => {
+                // From the Montreal white dwarf models for a 0.6 solar mass pure-hydrogen white dwarf at 12600K
                 const DA4_DATA = {
                     mass: 0.6,
-                    luminosityRelative: 0.00182,
-                    radiusRelative: 0.00922,
+                    luminosityRelative: 0.00381,
+                    radiusRelative: 0.0129,
                     temperature: 12600,
-                    colourIndexBv: -0.13,
-                    absoluteMagnitude: 12.5,
-                    bolometricCorrection: -0.9,
-                    bolometricMagnitude: 11.6,
+                    colourIndexBv: 0.13,
+                    absoluteMagnitude: 11.55,
+                    bolometricCorrection: -0.76,
+                    bolometricMagnitude: 10.79,
                     colour: {
                         r: 192,
                         g: 207,
@@ -1630,20 +1631,36 @@ describe("Classifier", function() {
                     expect(parse('DA4V', true).data).toEqual(DA4_DATA);
                 });
 
-                it("multiple sub-types", () => {
-                    expect(parse('DAO4', true).data).toEqual(DA4_DATA);
+                it("multiple sub-types average the data for each sub-type", () => {
+                    // DA uses the pure-hydrogen models and DO the pure-helium models
+                    const data = parse('DAO4', true).data;
+                    expect(data.luminosityRelative).toEqual(0.003652);  // geometric mean of 0.00381 and 0.00350
+                    expect(data.colourIndexBv).toEqual(0.055);         // mean of 0.13 and -0.02
+                    expect(data.bolometricMagnitude).toEqual(10.84);   // mean of 10.79 and 10.88
+                });
+
+                it("hydrogen and helium sub-types have different data", () => {
+                    const daData = parse('DA4', true).data,
+                        dbData = parse('DB4', true).data;
+                    expect(dbData.temperature).toEqual(daData.temperature);
+                    expect(dbData.colourIndexBv).toEqual(-0.02);
+                    expect(dbData.absoluteMagnitude).toEqual(11.74);
+                });
+
+                it("all have the typical white dwarf mass", () => {
+                    [0, 1, 5, 9].forEach(n => expect(parse('DA' + n, true).data.mass).toEqual(0.6));
                 });
 
                 it("sub-type only", () => {
                     expect(parse('DA', true).data).toEqual({
-                        mass: 0.5,
-                        luminosityRelative: 0.000693,
-                        radiusRelative: 0.0089,
+                        mass: 0.6,
+                        luminosityRelative: 0.00152,
+                        radiusRelative: 0.0128,
                         temperature: 10080,
-                        colourIndexBv: -0.07,
-                        absoluteMagnitude: 13.1,
-                        bolometricCorrection: -0.45,
-                        bolometricMagnitude: 12.65,
+                        colourIndexBv: 0.19,
+                        absoluteMagnitude: 12.14,
+                        bolometricCorrection: -0.36,
+                        bolometricMagnitude: 11.79,
                         colour: {
                             r: 207,
                             g: 218,

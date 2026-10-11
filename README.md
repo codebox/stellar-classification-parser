@@ -111,6 +111,11 @@ Among other things, the parser understands:
 
 Spaces are ignored, so `K0 III` is treated the same as `K0III`, and `B8 III p HgMn` the same as `B8IIIpHgMn`.
 
+## Data sources
+The physical data for white dwarfs comes from the [Montreal White Dwarf cooling models](http://www.astro.umontreal.ca/~bergeron/CoolingModels) of Pierre Bergeron and colleagues, using the models for a typical 0.6 solar mass white dwarf. `DA` white dwarfs use the pure-hydrogen models and the other types use the pure-helium models. See Holberg & Bergeron (2006, AJ, 132, 1221), Bergeron, Wesemael & Beauchamp (1995, PASP, 107, 1047), Tremblay, Bergeron & Gianninas (2011, ApJ, 730, 128), Bergeron et al. (2011, ApJ, 737, 28), Kowalski & Saumon (2006, ApJ, 651, L137), Blouin et al. (2018, ApJ, 863, 184) and Bédard et al. (2020, ApJ, 901, 93).
+
+The data for all other classes comes from [this table](http://www.isthe.com/chongo/tech/astro/HR-temp-mass-table-byhrclass.html).
+
 ## Changes in version 2.0.0
 Version 2 makes several changes that are not backwards compatible:
 
