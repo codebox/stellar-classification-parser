@@ -24,5 +24,8 @@
   "homepage": "https://github.com/codebox/stellar-classification-parser#readme",
   "dependencies": {
     "top-down-parser": "^1.0.1"
+  },
+  "devDependencies": {
+    "jasmine": "^7.0.0"
   }
 }
