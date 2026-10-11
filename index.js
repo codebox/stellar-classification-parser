@@ -46,13 +46,6 @@ const fs = require('fs'),
         "g" : "III"
     },
     SUFFIXES = {
-        class : populateDuplicates({
-            ':' : {
-                flagName : 'uncertain',
-                description : 'Uncertain spectral class'
-            },
-            '?' : ':'
-        }),
         whiteDwarf : populateDuplicates({
             'P' : {
                 flagName : 'magneticPolarized',
@@ -74,13 +67,6 @@ const fs = require('fs'),
                 flagName : 'peculiarities',
                 description : 'Peculiarities exist'
             }
-        }),
-        luminosity : populateDuplicates({
-            ':' : {
-                flagName : 'uncertain',
-                description : 'Uncertain luminosity'
-            },
-            '?' : ':'
         }),
         global : populateDuplicates({
             '...' : {
@@ -230,8 +216,8 @@ function populateClassDetails(tree, result) {
             return result;
         });
     }
-    function getClassSuffixes() {
-        return tree.find('CLASSES_SUFFIX').map(s => s.get()[0]);
+    function isUncertain() {
+        return tree.find('CLASSES_SUFFIX').length > 0;
     }
 
     const classes = getClasses();
@@ -302,23 +288,8 @@ function populateClassDetails(tree, result) {
             classDetails.value = classes[0];
         }
 
-        const classSuffixes = getClassSuffixes();
-        if (classSuffixes.length) {
-            const peculiarities = classDetails.peculiarities = {
-                text: classSuffixes.join(''),
-                flags: {},
-                details: []
-            };
-            classSuffixes.forEach(suffix => {
-                const details = SUFFIXES.class[suffix];
-                assert(details, suffix);
-
-                peculiarities.flags[details.flagName] = true;
-                peculiarities.details.push({
-                    text: suffix,
-                    description: details.description
-                });
-            });
+        if (isUncertain()) {
+            classDetails.uncertain = true;
         }
     }
 }
@@ -476,8 +447,8 @@ function populateLuminosityDetails(tree, result) {
             description : LUMINOSITY_DESCRIPTIONS[value]
         }
     }
-    function getLuminositySuffixes() {
-        return tree.find('LUMINOSITIES_SUFFIX').map(s => s.get()[0]);
+    function isUncertain() {
+        return tree.find('LUMINOSITIES_SUFFIX').length > 0;
     }
 
     if (hasLuminosityPrefix()) {
@@ -513,23 +484,8 @@ function populateLuminosityDetails(tree, result) {
         }
     }
 
-    const luminositySuffixes = getLuminositySuffixes();
-    if (luminositySuffixes.length) {
-        const peculiarities = result.luminosity.peculiarities = {
-            text : luminositySuffixes.join(''),
-            flags : {},
-            details : []
-        };
-        luminositySuffixes.forEach(suffix => {
-            const details = SUFFIXES.luminosity[suffix];
-            assert(details, suffix);
-
-            peculiarities.flags[details.flagName] = true;
-            peculiarities.details.push({
-                text : suffix,
-                description : details.description
-            });
-        });
+    if (isUncertain()) {
+        result.luminosity.uncertain = true;
     }
 }
 

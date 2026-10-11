@@ -43,7 +43,7 @@ Among other things, the parser understands:
 * Luminosity prefixes (`sd`, `d`, `sg`, `g`) or suffixes (`I`, `Ia0`, `Ia+`, `Ia`, `Iab`, `Ib`, `II`, `III` etc )
 * Luminosity suffix ranges and alternatives e.g. `O7V-VI` and `O7V/VI`
 * Numerous spectral peculiarity codes e.g. `...`, `comp`, `e`, `eq`, `f`, `(f)`, `((f))`, `He wk`, `m`
-* Uncertainty markers `:` or `?` after the class, luminosity, or any peculiarity code e.g. `G5:`, `G0V?` or `B2IVe:`. An uncertain peculiarity has `uncertain: true` in its `details` entry
+* Uncertainty markers `:` or `?` after the class, luminosity, or any peculiarity code e.g. `G5:`, `G0V?` or `B2IVe:`. The uncertain class or luminosity, or the peculiarity's `details` entry, gets `uncertain: true`
 * Codes for S-type stars including abundance indications for `ZrO/TiO`, `C/O` and `ZrO`
 * White dwarf codes `DA`, `DB`, `DO`, `DQ`, `DZ`, `DC` and `DX` with or without numeric suffixes, as well as peculiarity codes `P`, `E`, `H`, `V`, `PEC`
 * Carbon star types `C-R`, `C-N`, `C-J`, `C-H`, `C-Hd`

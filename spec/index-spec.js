@@ -398,16 +398,7 @@ describe("Classifier", function() {
                         letter : 'G',
                         number : 5
                     },
-                    peculiarities : {
-                        text : ':',
-                        flags : {
-                            uncertain : true
-                        },
-                        details : [{
-                            text : ':',
-                            description : 'Uncertain spectral class'
-                        }]
-                    }
+                    uncertain : true
                 }
             }));
         });
@@ -426,16 +417,7 @@ describe("Classifier", function() {
                         luminosityClass : 'II',
                         description : 'Bright Giant'
                     },
-                    peculiarities : {
-                        text : ':',
-                        flags : {
-                            uncertain : true
-                        },
-                        details : [{
-                            text : ':',
-                            description : 'Uncertain luminosity'
-                        }]
-                    }
+                    uncertain : true
                 }
             }));
         });
@@ -1527,29 +1509,41 @@ describe("Classifier", function() {
 
     describe("uncertainty markers", function() {
         it("? after the class marks the class as uncertain", () => {
-            expect(parse('G5?').class.peculiarities).toEqual({
-                text : '?',
-                flags : {
-                    uncertain : true
+            expect(parse('G5?').class).toEqual({
+                text : 'G5',
+                value : {
+                    letter : 'G',
+                    number : 5
                 },
-                details : [{
-                    text : '?',
-                    description : 'Uncertain spectral class'
-                }]
+                uncertain : true
             });
         });
 
         it("? after the luminosity marks the luminosity as uncertain", () => {
-            expect(parse('G0V?').luminosity.peculiarities).toEqual({
-                text : '?',
-                flags : {
-                    uncertain : true
+            expect(parse('G0V?').luminosity).toEqual({
+                text : 'V',
+                value : {
+                    luminosityClass : 'V',
+                    description : 'Dwarf (Main Sequence)'
                 },
-                details : [{
-                    text : '?',
-                    description : 'Uncertain luminosity'
-                }]
+                uncertain : true
             });
+        });
+
+        it("are only added when present", () => {
+            const result = parse('G0V');
+            expect(result.class.uncertain).toBeUndefined();
+            expect(result.luminosity.uncertain).toBeUndefined();
+        });
+
+        it("after a range or choice apply to the whole range or choice", () => {
+            expect(parse('G5-K2:').class.uncertain).toBe(true);
+            expect(parse('G5II/III:').luminosity.uncertain).toBe(true);
+        });
+
+        it("can be repeated after the class or luminosity", () => {
+            expect(parse('G5::').class.uncertain).toBe(true);
+            expect(parse('G5V:?').luminosity.uncertain).toBe(true);
         });
 
         it(": after a peculiarity marks that peculiarity as uncertain", () => theText("B2IVe:").isParsedToExactly({
@@ -1616,14 +1610,14 @@ describe("Classifier", function() {
 
         it("before a peculiarity apply to the luminosity, not the peculiarity", () => {
             const result = parse('G5III:e');
-            expect(result.luminosity.peculiarities.flags.uncertain).toBe(true);
+            expect(result.luminosity.uncertain).toBe(true);
             expect(result.peculiarities.details[0].uncertain).toBeUndefined();
         });
 
         it("work inside components", () => {
             const components = parse('F5Ve:+K0III?').components;
             expect(components[0].peculiarities.details[0].uncertain).toBe(true);
-            expect(components[1].luminosity.peculiarities.flags.uncertain).toBe(true);
+            expect(components[1].luminosity.uncertain).toBe(true);
         });
 
         it("cannot appear on their own", () => {
