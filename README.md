@@ -19,6 +19,8 @@ and call the `parse` function in your code, like this:
     console.log(JSON.stringify(result));
 
 
+If the value can't be parsed then `parse` returns `undefined`. This includes values that aren't strings, and strings longer than 100 characters.
+
 The `parse` method has an optional second parameter which, if set to `true`, may return some additional data related to the physical attributes of the star, such as its temperature, luminosity, radius and colour. If the classification doesn't include a luminosity class then the data for a main-sequence (`V`) star is returned, and if there is no numeric sub-division then `5` is assumed.
 
 ## Using the Web Service

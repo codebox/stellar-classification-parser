@@ -9,6 +9,8 @@ const fs = require('fs'),
     EPSILON = 'ε',
     UNABLE_TO_PARSE = 'nope',
     MAX_CACHE_SIZE = 1000,
+    // Well above the length of any real classification, but short enough that the recursive parser can't overflow the stack
+    MAX_INPUT_LENGTH = 100,
     cache = new Map(),
     parser = require('top-down-parser').buildParser(grammarText, START_SYMBOL, EPSILON),
     LUMINOSITY_DESCRIPTIONS = {
@@ -712,6 +714,10 @@ function parseText(text) {
 }
 
 function parse(text, augmentWithData) {
+    if (typeof text !== 'string' || text.length > MAX_INPUT_LENGTH) {
+        return;
+    }
+
     const cachedResult = parseText(text);
 
     if (cachedResult !== UNABLE_TO_PARSE) {

@@ -1516,6 +1516,28 @@ describe("Classifier", function() {
         });
     });
 
+    describe("invalid input", function() {
+        it("non-string values cannot be parsed", () => {
+            [undefined, null, 5, {}, [], true].forEach(value => {
+                expect(() => parse(value)).not.toThrow();
+                expect(parse(value)).toBeUndefined();
+            });
+        });
+
+        it("empty string cannot be parsed", () => theText("").cannotBeParsed());
+
+        it("very long strings cannot be parsed", () => {
+            const text = 'G' + 'e'.repeat(10000);
+            expect(() => parse(text)).not.toThrow();
+            expect(parse(text)).toBeUndefined();
+        });
+
+        it("strings up to the maximum length can be parsed", () => {
+            expect(parse('G' + 'e'.repeat(99)).peculiarities.details.length).toEqual(99);
+            expect(parse('G' + 'e'.repeat(100))).toBeUndefined();
+        });
+    });
+
     describe("caching", function() {
         it("an unparseable input does not affect a different valid input", () => {
             expect(parse('B7V_true')).toBeUndefined();
