@@ -299,6 +299,11 @@ function populateClassDetails(tree, result) {
         return tree.find('CLASSES_SUFFIX').length > 0;
     }
 
+    if (!tree.findOptional('AM_CLASSES').empty) {
+        // Handled by populateAmClassDetails
+        return;
+    }
+
     const classes = getClasses();
     if (classes.length) {
         const classDetails = result.class = {};
@@ -370,6 +375,51 @@ function populateClassDetails(tree, result) {
         if (isUncertain()) {
             classDetails.uncertain = true;
         }
+    }
+}
+
+function populateAmClassDetails(tree, result) {
+    const amClasses = tree.findOptional('AM_CLASSES');
+    if (amClasses.empty) {
+        return;
+    }
+
+    // Am (metallic-line) stars give separate types from the calcium K line, the hydrogen lines and the metal lines, eg kA2hA5mA7
+    function getLineType(symbol) {
+        const lineType = amClasses.findOptional(symbol);
+        if (!lineType.empty) {
+            const clazz = lineType.findOnly('AM_CLASS'),
+                result = {};
+            clazz.onOnlyValue('CLASS_LETTER', letter => result.letter = letter[0]);
+            clazz.onOptionalValue('CLASS_NUMBER', classNumber => result.number = Number(classNumber.collectText()));
+            return result;
+        }
+    }
+
+    const lineTypes = {},
+        calciumK = getLineType('AM_K_TYPE'),
+        hydrogen = getLineType('AM_H_TYPE'),
+        metallic = getLineType('AM_M_TYPE');
+
+    if (calciumK) {
+        lineTypes.calciumK = calciumK;
+    }
+    if (hydrogen) {
+        lineTypes.hydrogen = hydrogen;
+    }
+    if (metallic) {
+        lineTypes.metallic = metallic;
+    }
+
+    // The hydrogen line type is the best guide to temperature, so use it as the main class if it's present
+    const mainType = hydrogen || calciumK;
+
+    result.class = {
+        text : amClasses.findOnly('AM_CLASSES_BODY').collectText(),
+        value : Object.assign({}, mainType, {lineTypes})
+    };
+    if (amClasses.find('CLASSES_SUFFIX').length) {
+        result.class.uncertain = true;
     }
 }
 
@@ -727,6 +777,7 @@ function transformStar(tree) {
     const result = {};
 
     populateClassDetails(tree, result);
+    populateAmClassDetails(tree, result);
     populateSTypeClassDetails(tree, result);
     populateWhiteDwarfDetails(tree, result);
     populateCarbonStarDetails(tree, result);

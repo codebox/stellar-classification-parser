@@ -1673,6 +1673,70 @@ describe("Classifier", function() {
         });
     });
 
+    describe("Am stars", function() {
+        it("have calcium K, hydrogen and metallic line types", () => theText("kA2hA5mA7V").isParsedToExactly({
+            class : {
+                text : 'kA2hA5mA7',
+                value : {
+                    letter : 'A',
+                    number : 5,
+                    lineTypes : {
+                        calciumK : {letter : 'A', number : 2},
+                        hydrogen : {letter : 'A', number : 5},
+                        metallic : {letter : 'A', number : 7}
+                    }
+                }
+            },
+            luminosity : {
+                text : 'V',
+                value : {luminosityClass : 'V', description : 'Dwarf (Main Sequence)'}
+            }
+        }));
+
+        it("use the K line type as the main class when there is no hydrogen type", () => {
+            expect(parse('kA2mA7').class.value).toEqual({
+                letter : 'A',
+                number : 2,
+                lineTypes : {
+                    calciumK : {letter : 'A', number : 2},
+                    metallic : {letter : 'A', number : 7}
+                }
+            });
+        });
+
+        it("can omit one of the line types", () => {
+            expect(Object.keys(parse('hA5mA7 IV').class.value.lineTypes)).toEqual(['hydrogen', 'metallic']);
+            expect(Object.keys(parse('kA2hA5').class.value.lineTypes)).toEqual(['calciumK', 'hydrogen']);
+        });
+
+        it("can have line types from different letters", () => {
+            expect(parse('kA3hA5mF0 V').class.value.lineTypes.metallic).toEqual({letter : 'F', number : 0});
+        });
+
+        it("can be uncertain and have peculiarities", () => {
+            const result = parse('kA2hA5mA7:Vp');
+            expect(result.class.uncertain).toBe(true);
+            expect(result.peculiarities.text).toEqual('p');
+        });
+
+        it("use the hydrogen type for data", () => {
+            expect(parse('kA2hA5mA7V', true).data).toEqual(parse('A5V', true).data);
+        });
+
+        it("need at least two line types", () => {
+            theText('kA2').cannotBeParsed();
+            theText('hA5').cannotBeParsed();
+        });
+
+        it("only use the ordinary classes", () => {
+            theText('kA2hA5mWN5').cannotBeParsed();
+        });
+
+        it("don't change the meaning of the m peculiarity", () => {
+            expect(parse('A5m').peculiarities.text).toEqual('m');
+        });
+    });
+
     describe("brown dwarfs", function() {
         it("L, T and Y are valid classes", () => {
             expect(parse('L2').class.value).toEqual({letter : 'L', number : 2});
