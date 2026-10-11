@@ -51,7 +51,8 @@ const fs = require('fs'),
             ':' : {
                 flagName : 'uncertain',
                 description : 'Uncertain spectral class'
-            }
+            },
+            '?' : ':'
         }),
         whiteDwarf : populateDuplicates({
             'P' : {
@@ -79,7 +80,8 @@ const fs = require('fs'),
             ':' : {
                 flagName : 'uncertain',
                 description : 'Uncertain luminosity'
-            }
+            },
+            '?' : ':'
         }),
         global : populateDuplicates({
             '...' : {
@@ -534,35 +536,58 @@ function populateLuminosityDetails(tree, result) {
 
 function populatePeculiarities(tree, result) {
     function getSuffixes() {
-        return tree.find('SUFFIX').filter(s => s.get().every(i => typeof i === 'string')).map(s => s.get().join(' '));
+        // Walk the SUFFIXES list in order, so that each peculiarity is kept together with any uncertainty markers that follow it
+        const suffixes = [];
+        let suffixesTree = tree.findOptional('SUFFIXES');
+
+        while (!suffixesTree.empty) {
+            const [suffix, uncertainties, remainingSuffixes] = suffixesTree.children(),
+                suffixValue = suffix.findOnly('SUFFIX'),
+                elements = suffixValue.find('ELEMENT');
+
+            suffixes.push({
+                isElement : elements.length > 0,
+                text : elements.length ? elements[0].get()[0] : suffixValue.get().join(' '),
+                uncertainty : uncertainties.collectText()
+            });
+            suffixesTree = remainingSuffixes.findOptional('SUFFIXES');
+        }
+
+        return suffixes;
     }
 
-    function getElements() {
-        return tree.find('ELEMENT').map(e => e.get()[0]);
+    function buildDetails(suffix, description) {
+        const details = {
+            text : suffix.text,
+            description
+        };
+        if (suffix.uncertainty) {
+            details.uncertain = true;
+        }
+        return details;
     }
 
-    const suffixes = getSuffixes();
+    const allSuffixes = getSuffixes(),
+        suffixes = allSuffixes.filter(s => !s.isElement),
+        elements = allSuffixes.filter(s => s.isElement),
+        getText = s => s.text + s.uncertainty;
 
     if (suffixes.length) {
         result.peculiarities = {
-            text : suffixes.join(' '),
+            text : suffixes.map(getText).join(' '),
             flags : {},
             details : []
         };
 
         suffixes.forEach(suffix => {
-            const details = SUFFIXES.global[suffix];
-            assert(details, suffix);
+            const details = SUFFIXES.global[suffix.text];
+            assert(details, suffix.text);
 
             result.peculiarities.flags[details.flagName] = true;
-            result.peculiarities.details.push({
-                text : suffix,
-                description : details.description
-            });
+            result.peculiarities.details.push(buildDetails(suffix, details.description));
         });
     }
 
-    const elements = getElements();
     if (elements.length) {
         if (!result.peculiarities) {
             result.peculiarities = {
@@ -574,17 +599,14 @@ function populatePeculiarities(tree, result) {
             result.peculiarities.text += ' ';
         }
 
-        result.peculiarities.text += elements.join(' ');
+        result.peculiarities.text += elements.map(getText).join(' ');
         const flags = result.peculiarities.flags.elements = {};
 
         elements.forEach(element => {
-            const details = ELEMENTS[element];
+            const details = ELEMENTS[element.text];
 
             flags[details.flagName] = true;
-            result.peculiarities.details.push({
-                text : element,
-                description : `Abnormally strong spectral lines of ${details.description}`
-            });
+            result.peculiarities.details.push(buildDetails(element, `Abnormally strong spectral lines of ${details.description}`));
         });
     }
 }

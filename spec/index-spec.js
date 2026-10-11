@@ -1524,6 +1524,113 @@ describe("Classifier", function() {
         });
     });
 
+    describe("uncertainty markers", function() {
+        it("? after the class marks the class as uncertain", () => {
+            expect(parse('G5?').class.peculiarities).toEqual({
+                text : '?',
+                flags : {
+                    uncertain : true
+                },
+                details : [{
+                    text : '?',
+                    description : 'Uncertain spectral class'
+                }]
+            });
+        });
+
+        it("? after the luminosity marks the luminosity as uncertain", () => {
+            expect(parse('G0V?').luminosity.peculiarities).toEqual({
+                text : '?',
+                flags : {
+                    uncertain : true
+                },
+                details : [{
+                    text : '?',
+                    description : 'Uncertain luminosity'
+                }]
+            });
+        });
+
+        it(": after a peculiarity marks that peculiarity as uncertain", () => theText("B2IVe:").isParsedToExactly({
+            class : {
+                text : 'B2',
+                value : {
+                    letter : 'B',
+                    number : 2
+                }
+            },
+            luminosity : {
+                text : 'IV',
+                value : {
+                    luminosityClass : 'IV',
+                    description : 'Sub-Giant'
+                }
+            },
+            peculiarities : {
+                text : 'e:',
+                flags : {
+                    emissionLines : true
+                },
+                details : [{
+                    text : 'e',
+                    description : 'Emission lines',
+                    uncertain : true
+                }]
+            }
+        }));
+
+        it("? after a peculiarity marks that peculiarity as uncertain", () => {
+            const peculiarities = parse('G5Vn?').peculiarities;
+            expect(peculiarities.text).toEqual('n?');
+            expect(peculiarities.details).toEqual([{
+                text : 'n',
+                description : 'Broad absorption due to spinning',
+                uncertain : true
+            }]);
+        });
+
+        it("only apply to the peculiarity immediately before them", () => {
+            const peculiarities = parse('B8IIIpHg:Mn').peculiarities;
+            expect(peculiarities.text).toEqual('p Hg: Mn');
+            expect(peculiarities.details.map(d => [d.text, !!d.uncertain])).toEqual([
+                ['p', false],
+                ['Hg', true],
+                ['Mn', false]
+            ]);
+        });
+
+        it("can be repeated", () => {
+            const peculiarities = parse('G5e::').peculiarities;
+            expect(peculiarities.text).toEqual('e::');
+            expect(peculiarities.details[0].uncertain).toBe(true);
+        });
+
+        it("work on multi-word peculiarities", () => {
+            expect(parse('G He wk:').peculiarities.details).toEqual([{
+                text : 'He wk',
+                description : 'Weak Helium lines',
+                uncertain : true
+            }]);
+        });
+
+        it("before a peculiarity apply to the luminosity, not the peculiarity", () => {
+            const result = parse('G5III:e');
+            expect(result.luminosity.peculiarities.flags.uncertain).toBe(true);
+            expect(result.peculiarities.details[0].uncertain).toBeUndefined();
+        });
+
+        it("work inside components", () => {
+            const components = parse('F5Ve:+K0III?').components;
+            expect(components[0].peculiarities.details[0].uncertain).toBe(true);
+            expect(components[1].luminosity.peculiarities.flags.uncertain).toBe(true);
+        });
+
+        it("cannot appear on their own", () => {
+            expect(parse('?')).toBeUndefined();
+            expect(parse(':')).toBeUndefined();
+        });
+    });
+
     describe("multiple stars with their own luminosities", function() {
         it("are parsed as separate components", () => {
             expect(parse('F5V+K0III')).toEqual({
